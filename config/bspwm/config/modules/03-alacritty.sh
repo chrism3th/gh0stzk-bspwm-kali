@@ -1,8 +1,9 @@
 #!/bin/sh
 
-sed -i "$HOME"/.config/alacritty/fonts.toml \
+sed -i \
     -e "s/size = .*/size = $term_font_size/" \
-    -e "s/family = .*/family = \"$term_font_name\"/"
+    -e "s/family = .*/family = \"$term_font_name\"/" \
+    "$HOME"/.config/alacritty/fonts.toml
 
 cat >"$HOME"/.config/alacritty/rice-colors.toml <<-EOF
 # Default colors

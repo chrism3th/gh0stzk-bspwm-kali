@@ -20,6 +20,30 @@ read -r current_style < "$cfgStyle"
 styleDir="$HOME/.config/bspwm/config/rofi-themes"
 rofiAssetDir="$HOME/.config/bspwm/config/assets"
 
+# ImageMagick compatibility (Debian often ships IM6 without `magick`).
+get_image_cmd() {
+    if command -v magick >/dev/null 2>&1; then
+        echo "magick"
+        return 0
+    fi
+    echo "convert"
+}
+
+ensure_rofi_header() {
+    cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
+    header_file="$cache_dir/rofi_header.webp"
+
+    [ -f "$header_file" ] && return 0
+
+    fallback_image="$HOME/.config/bspwm/config/assets/fallback.webp"
+    [ -f "$fallback_image" ] || return 0
+
+    mkdir -p "$cache_dir"
+    IM_CMD="$(get_image_cmd)"
+    "$IM_CMD" "$fallback_image" -strip -resize 30% -gravity center -crop 760x196+0+0 +repage -quality 65 \
+        -define webp:method=3 -define webp:thread-level=1 "$header_file" 2>/dev/null || true
+}
+
 # Function to select the styles
 choose_launcher_style() {
 
@@ -58,6 +82,7 @@ choose_launcher_style() {
 
 launch_launcher () {
     ROFI_THEME="$styleDir/style_$current_style.rasi"
+    ensure_rofi_header
     rofi -show drun -theme "$ROFI_THEME"
 }
 

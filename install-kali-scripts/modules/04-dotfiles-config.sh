@@ -589,14 +589,14 @@ fi
 
 if [ -d "$HOME/.config/bspwm" ]; then
     chmod +x "$HOME/.config/bspwm/bspwmrc" 2>/dev/null
-    chmod +x "$HOME/.config/bspwm/scripts/"* 2>/dev/null
+    chmod +x "$HOME/.config/bspwm/bin/"* 2>/dev/null
     msg_ok "Permisos establecidos para scripts de bspwm"
 fi
 
 # Verificar configuración de sxhkd
 msg_info "Verificando configuración de sxhkd..."
 
-sxhkdrc="$HOME/.config/bspwm/sxhkdrc"
+sxhkdrc="$HOME/.config/bspwm/config/sxhkdrc"
 if [ -f "$sxhkdrc" ]; then
     msg_ok "Archivo sxhkdrc encontrado"
 else

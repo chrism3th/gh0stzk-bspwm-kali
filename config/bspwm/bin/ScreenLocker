@@ -19,6 +19,17 @@
 
 TEMP_IMAGE="/tmp/i3lock.jpg"
 
+# ImageMagick compatibility (Debian often ships IM6 without `magick`).
+get_image_cmd() {
+    if command -v magick >/dev/null 2>&1; then
+        echo "magick"
+        return 0
+    fi
+    echo "convert"
+}
+
+IM_CMD="$(get_image_cmd)"
+
 # Colors
 bg=#1a1b26
 fg=#c0caf5
@@ -105,7 +116,7 @@ default_lockscreen () {
     calculate_positions
     
     maim -d 0.3 -u ${TEMP_IMAGE}
-    magick $TEMP_IMAGE -blur 5x4 $TEMP_IMAGE
+    "$IM_CMD" "$TEMP_IMAGE" -blur 5x4 "$TEMP_IMAGE"
     i3lock -n --force-clock -i $TEMP_IMAGE -e --indicator \
         --radius=$RADIUS --ring-width=$RING_WIDTH --inside-color=$bg \
         --ring-color=$ring --insidever-color=$verify --ringver-color=$verify \
@@ -139,7 +150,7 @@ rice_lockscreen () {
     # If the image is *.webp convert to /tmp/lock_image.jpg
     case "$lock_image" in
         *.webp|*.jpg|*.jpeg|*.png)
-            magick "$lock_image" "$TEMP_IMAGE" || exit 1
+            "$IM_CMD" "$lock_image" "$TEMP_IMAGE" || exit 1
         ;;
     esac
 

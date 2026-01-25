@@ -13,71 +13,101 @@ create_temp_dir
 # ============================================
 section_banner "Instalación de Rust/Cargo"
 
-if command_exists rustc && command_exists cargo; then
-    rust_version=$(rustc --version)
-    msg_ok "Rust ya está instalado: $rust_version"
+ensure_rust_and_cargo() {
+    if command_exists rustc && command_exists cargo; then
+        rust_version=$(rustc --version 2>/dev/null || echo "versión desconocida")
+        msg_ok "Rust ya está instalado: $rust_version"
 
-    msg_info "Actualizando Rust a la última versión..."
-    if rustup update >> "$ERROR_LOG" 2>&1; then
-        msg_ok "Rust actualizado correctamente"
-    else
-        msg_warning "No se pudo actualizar Rust (puede no ser crítico)"
+        if command_exists rustup; then
+            msg_info "Actualizando Rust a la última versión..."
+            if rustup update >> "$ERROR_LOG" 2>&1; then
+                msg_ok "Rust actualizado correctamente"
+            else
+                msg_warning "No se pudo actualizar Rust (puede no ser crítico)"
+            fi
+        fi
+
+        return 0
     fi
-else
-    msg_info "Instalando Rust mediante rustup..."
 
+    msg_info "Instalando Rust..."
+
+    # Prefer rustup, fall back to APT if rustup fails (network/TLS issues are common).
     if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y >> "$ERROR_LOG" 2>&1; then
         msg_ok "Rustup instalado correctamente"
-
-        source "$HOME/.cargo/env"
-
-        if command_exists rustc && command_exists cargo; then
-            rust_version=$(rustc --version)
-            cargo_version=$(cargo --version)
-            msg_ok "Rust instalado: $rust_version"
-            msg_ok "Cargo instalado: $cargo_version"
-        else
-            msg_error "Rust se instaló pero no se encuentra en el PATH"
-            msg_info "Intenta cerrar y abrir una nueva terminal"
-            exit 1
+        if [ -f "$HOME/.cargo/env" ]; then
+            # shellcheck disable=SC1090
+            source "$HOME/.cargo/env" 2>/dev/null || true
         fi
     else
-        msg_error "Fallo al instalar Rust"
-        log_error "Fallo en instalación de rustup"
-        exit 1
-    fi
-fi
+        msg_warning "Fallo al instalar Rust con rustup, intentando instalar desde APT..."
+        log_error "rustup falló; intentando APT (rustc cargo)"
 
-# Asegurar que cargo/bin está en el PATH
-if [ -d "$HOME/.cargo/bin" ]; then
-    export PATH="$HOME/.cargo/bin:$PATH"
-    msg_ok "Ruta de cargo añadida al PATH"
+        if sudo apt install -y rustc cargo >> "$ERROR_LOG" 2>&1; then
+            msg_ok "Rust instalado desde APT"
+        else
+            msg_warning "No se pudo instalar Rust/Cargo desde APT"
+            log_error "APT install rustc cargo falló"
+            return 1
+        fi
+    fi
+
+    # Asegurar que cargo/bin está en el PATH (si existe).
+    if [ -d "$HOME/.cargo/bin" ]; then
+        export PATH="$HOME/.cargo/bin:$PATH"
+    fi
+
+    if command_exists rustc && command_exists cargo; then
+        rust_version=$(rustc --version 2>/dev/null || echo "versión desconocida")
+        cargo_version=$(cargo --version 2>/dev/null || echo "versión desconocida")
+        msg_ok "Rust disponible: $rust_version"
+        msg_ok "Cargo disponible: $cargo_version"
+        return 0
+    fi
+
+    msg_warning "Rust/Cargo no están disponibles; se omitirán herramientas basadas en cargo"
+    log_error "rustc/cargo no disponibles tras instalación"
+    return 1
+}
+
+HAS_CARGO=false
+if ensure_rust_and_cargo; then
+    HAS_CARGO=true
+    msg_ok "Rust/Cargo listos (si aplica)"
 fi
 
 # Instalar eza (reemplazo moderno de ls)
-if command_exists eza; then
-    msg_ok "eza ya está instalado"
-else
-    msg_info "Instalando eza..."
-    if cargo install eza >> "$ERROR_LOG" 2>&1; then
-        msg_ok "eza instalado correctamente"
+if [ "$HAS_CARGO" = true ] && command_exists cargo; then
+    if command_exists eza; then
+        msg_ok "eza ya está instalado"
     else
-        msg_warning "Fallo al instalar eza (no crítico)"
-        log_error "Fallo al instalar eza desde cargo"
+        msg_info "Instalando eza..."
+        if cargo install eza >> "$ERROR_LOG" 2>&1; then
+            msg_ok "eza instalado correctamente"
+        else
+            msg_warning "Fallo al instalar eza (no crítico)"
+            log_error "Fallo al instalar eza desde cargo"
+        fi
     fi
+else
+    msg_warning "Cargo no disponible; omitiendo instalación de eza"
 fi
 
 # Instalar yazi (file manager para terminal)
-if command_exists yazi; then
-    msg_ok "yazi ya está instalado"
-else
-    msg_info "Instalando yazi (puede tomar varios minutos)..."
-    if cargo install --locked yazi-fm yazi-cli >> "$ERROR_LOG" 2>&1; then
-        msg_ok "yazi instalado correctamente"
+if [ "$HAS_CARGO" = true ] && command_exists cargo; then
+    if command_exists yazi; then
+        msg_ok "yazi ya está instalado"
     else
-        msg_warning "Fallo al instalar yazi (no crítico)"
-        log_error "Fallo al instalar yazi desde cargo"
+        msg_info "Instalando yazi (puede tomar varios minutos)..."
+        if cargo install --locked yazi-fm yazi-cli >> "$ERROR_LOG" 2>&1; then
+            msg_ok "yazi instalado correctamente"
+        else
+            msg_warning "Fallo al instalar yazi (no crítico)"
+            log_error "Fallo al instalar yazi desde cargo"
+        fi
     fi
+else
+    msg_warning "Cargo no disponible; omitiendo instalación de yazi"
 fi
 
 msg_ok "Instalación de Rust y herramientas completada"
@@ -103,8 +133,9 @@ fi
 
 if [ "${COMPILE_EWW:-false}" = true ]; then
     if ! command_exists cargo; then
-        msg_error "Cargo no está instalado"
-        exit 1
+        msg_warning "Cargo no está instalado; se omite compilación de eww"
+        log_error "eww: cargo no disponible, compilación omitida"
+        COMPILE_EWW=false
     fi
 
     msg_info "Clonando repositorio de eww..."
@@ -421,37 +452,136 @@ fi
 
 # ZSH PLUGINS
 msg_info "Instalando plugins de Zsh..."
-ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
-mkdir -p "$ZSH_CUSTOM/plugins"
 
-if [ ! -d "$ZSH_CUSTOM/plugins/zsh-history-substring-search" ]; then
-    msg_info "Instalando zsh-history-substring-search..."
-    if git clone --depth=1 https://github.com/zsh-users/zsh-history-substring-search \
-        "$ZSH_CUSTOM/plugins/zsh-history-substring-search" >> "$ERROR_LOG" 2>&1; then
-        msg_ok "zsh-history-substring-search instalado"
-    else
-        msg_warning "Error al instalar zsh-history-substring-search"
-    fi
-else
-    msg_ok "zsh-history-substring-search ya está instalado"
-fi
+# Store custom Zsh plugins in a distro-agnostic location (no Oh-My-Zsh required).
+ZSH_PLUGIN_DIR="${ZSH_PLUGIN_DIR:-$HOME/.config/zsh/plugins}"
+mkdir -p "$ZSH_PLUGIN_DIR"
 
-if [ ! -d "$ZSH_CUSTOM/plugins/fzf-tab" ]; then
-    msg_info "Instalando fzf-tab..."
-    if git clone --depth=1 https://github.com/Aloxaf/fzf-tab \
-        "$ZSH_CUSTOM/plugins/fzf-tab" >> "$ERROR_LOG" 2>&1; then
-        msg_ok "fzf-tab instalado"
-    else
-        msg_warning "Error al instalar fzf-tab"
+install_zsh_plugin() {
+    local plugin_name="$1"
+    local repo_url="$2"
+    local dest_dir="${ZSH_PLUGIN_DIR}/${plugin_name}"
+
+    if [ -d "$dest_dir" ]; then
+        msg_ok "${plugin_name} ya está instalado"
+        return 0
     fi
-else
-    msg_ok "fzf-tab ya está instalado"
-fi
+
+    msg_info "Instalando ${plugin_name}..."
+    if git clone --depth=1 "$repo_url" "$dest_dir" >> "$ERROR_LOG" 2>&1; then
+        msg_ok "${plugin_name} instalado"
+        return 0
+    fi
+
+    msg_warning "Error al instalar ${plugin_name}"
+    log_error "Git clone ${plugin_name} falló"
+    return 1
+}
+
+install_zsh_plugin "zsh-history-substring-search" "https://github.com/zsh-users/zsh-history-substring-search" || true
+install_zsh_plugin "fzf-tab" "https://github.com/Aloxaf/fzf-tab" || true
 
 # Verificar jgmenu
+install_jgmenu_from_source() {
+    # Prefer a user-local install to avoid requiring sudo for `make install`.
+    local prefix="${HOME}/.local"
+    local repo_url="https://github.com/johanmalm/jgmenu.git"
+    local build_dir="$TEMP_DIR/jgmenu"
+
+    msg_info "Instalando jgmenu desde fuente (fallback)..."
+
+    # Build dependencies (Debian/Kali)
+    local deps=(
+        "git" "make" "gcc" "pkg-config"
+        "libx11-dev" "libxrandr-dev" "libcairo2-dev" "libpango1.0-dev" "libglib2.0-dev"
+    )
+
+    local missing=()
+    for dep in "${deps[@]}"; do
+        if ! dpkg -l | grep -q "^ii  $dep"; then
+            missing+=("$dep")
+        fi
+    done
+
+    if [ ${#missing[@]} -gt 0 ]; then
+        msg_info "Instalando dependencias de jgmenu (${#missing[@]})..."
+        if ! sudo apt install -y "${missing[@]}" >> "$ERROR_LOG" 2>&1; then
+            msg_warning "No se pudieron instalar todas las dependencias de jgmenu"
+            log_error "Fallo al instalar dependencias de jgmenu: ${missing[*]}"
+        fi
+    fi
+
+    rm -rf "$build_dir" 2>/dev/null || true
+    if ! git clone --depth=1 "$repo_url" "$build_dir" >> "$ERROR_LOG" 2>&1; then
+        msg_error "Fallo al clonar el repositorio de jgmenu"
+        log_error "Git clone jgmenu falló"
+        return 1
+    fi
+
+    cd "$build_dir" || return 1
+
+    msg_info "Configurando jgmenu..."
+    if ! ./configure --prefix="$prefix" --with-lx --with-pmenu >> "$ERROR_LOG" 2>&1; then
+        msg_warning "configure con --with-lx/--with-pmenu falló, intentando configuración mínima..."
+        log_error "jgmenu configure con extras falló; reintentando sin extras"
+
+        if ! ./configure --prefix="$prefix" >> "$ERROR_LOG" 2>&1; then
+            msg_error "No se pudo configurar jgmenu"
+            log_error "jgmenu configure falló"
+            cd - > /dev/null || true
+            return 1
+        fi
+    fi
+
+    msg_info "Compilando jgmenu..."
+    if ! make >> "$ERROR_LOG" 2>&1; then
+        msg_error "Fallo durante la compilación de jgmenu"
+        log_error "make jgmenu falló"
+        cd - > /dev/null || true
+        return 1
+    fi
+
+    msg_info "Instalando jgmenu en ${prefix}..."
+    if ! make install >> "$ERROR_LOG" 2>&1; then
+        msg_error "Fallo durante la instalación de jgmenu"
+        log_error "make install jgmenu falló"
+        cd - > /dev/null || true
+        return 1
+    fi
+
+    cd - > /dev/null || true
+
+    # Refresh shell command cache if available.
+    hash -r 2>/dev/null || true
+
+    if command_exists jgmenu; then
+        msg_ok "jgmenu instalado correctamente"
+        return 0
+    fi
+
+    msg_warning "jgmenu fue instalado pero no se encuentra en PATH"
+    msg_info "Asegúrate de tener ${prefix}/bin en tu PATH"
+    log_error "jgmenu instalado pero no encontrado en PATH (prefix=${prefix})"
+    return 1
+}
+
 if ! command_exists jgmenu; then
-    msg_warning "jgmenu no está instalado, instalando desde APT..."
-    sudo apt install -y jgmenu >> "$ERROR_LOG" 2>&1
+    msg_warning "jgmenu no está instalado, intentando instalar..."
+
+    if apt-cache show jgmenu &>/dev/null; then
+        msg_info "Instalando jgmenu desde APT..."
+        if sudo apt install -y jgmenu >> "$ERROR_LOG" 2>&1; then
+            msg_ok "jgmenu instalado desde APT"
+        else
+            msg_warning "Fallo al instalar jgmenu desde APT, usando fallback desde fuente..."
+            log_error "APT install jgmenu falló; usando fallback"
+            install_jgmenu_from_source || true
+        fi
+    else
+        msg_warning "jgmenu no está disponible en repositorios, usando fallback desde fuente..."
+        log_error "jgmenu no disponible en repos; usando fallback"
+        install_jgmenu_from_source || true
+    fi
 fi
 
 msg_ok "Instalación de herramientas adicionales completada"

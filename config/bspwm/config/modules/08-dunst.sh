@@ -2,7 +2,7 @@
 
 dunst_config_file="$HOME/.config/bspwm/config/dunstrc"
 
-sed -i "$dunst_config_file" \
+sed -i \
     -e "s/origin = .*/origin = ${dunst_origin}/" \
     -e "s/offset = .*/offset = ${dunst_offset}/" \
     -e "s/transparency = .*/transparency = ${dunst_transparency}/" \
@@ -11,7 +11,8 @@ sed -i "$dunst_config_file" \
     -e "s/frame_color = .*/frame_color = \"${dunst_frame_color}\"/" \
     -e "s/font = .*/font = ${dunst_font}/" \
     -e "s/foreground='.*'/foreground='${blue}'/" \
-    -e "s/icon_theme = .*/icon_theme = \"${dunst_icon_theme}, Adwaita\"/"
+    -e "s/icon_theme = .*/icon_theme = \"${dunst_icon_theme}, Adwaita\"/" \
+    "$dunst_config_file"
 
 sed -i '/urgency_low/Q' "$dunst_config_file"
 cat >>"$dunst_config_file" <<-_EOF_

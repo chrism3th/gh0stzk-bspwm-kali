@@ -33,6 +33,17 @@ cacheDir="$HOME/.cache/$USER/$current_rice"
 
 rofi_command="rofi -dmenu -theme $HOME/.config/bspwm/config/rofi-themes/WallSelect.rasi"
 
+# ImageMagick compatibility (Debian often ships IM6 without `magick`).
+get_image_cmd() {
+    if command -v magick >/dev/null 2>&1; then
+        echo "magick"
+        return 0
+    fi
+    echo "convert"
+}
+
+IM_CMD="$(get_image_cmd)"
+
 # Detect number of cores and set a sensible number of jobs
 get_optimal_jobs() {
     cores=$(nproc)
@@ -57,14 +68,14 @@ process_func_def='process_image() {
     (
         flock -x 9
         if [ ! -f "$cache_file" ] || [ ! -f "$md5_file" ] || [ "$current_md5" != "$(cat "$md5_file" 2>/dev/null)" ]; then
-            magick "$imagen" -resize 500x500^ -gravity center -extent 500x500 "$cache_file"
+            "$IM_CMD" "$imagen" -resize 500x500^ -gravity center -extent 500x500 "$cache_file"
             echo "$current_md5" > "$md5_file"
         fi
         rm -f "$lock_file"
     ) 9>"$lock_file"
 }'
 
-export process_func_def cacheDir wall_dir
+export process_func_def cacheDir wall_dir IM_CMD
 
 # Clean old locks before starting
 rm -f "${cacheDir}"/.lock_* 2>/dev/null || true
@@ -98,8 +109,9 @@ wall_selection=$(find "${wall_dir}" -type f \( -iname "*.jpg" -o -iname "*.jpeg"
 
 # Set wallpaper
 [ -n "$wall_selection" ] && \
-    sed -i "$HOME/.config/bspwm/rices/$current_rice/theme-config.bash" \
+    sed -i \
         -e 's/^ENGINE=.*/ENGINE="Default"/' \
-        -e "s|^DEFAULT_WALL=.*|DEFAULT_WALL=\"$wall_dir/$wall_selection\"|" && \
+        -e "s|^DEFAULT_WALL=.*|DEFAULT_WALL=\"$wall_dir/$wall_selection\"|" \
+        "$HOME/.config/bspwm/rices/$current_rice/theme-config.bash" && \
     feh --bg-fill "${wall_dir}/${wall_selection}" && \
     WallSync &

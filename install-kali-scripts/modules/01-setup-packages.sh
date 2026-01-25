@@ -149,7 +149,7 @@ apt_packages=(
     # Dependencias para compilación posterior (corregidos)
     "libgtk-3-dev" "libpango1.0-dev" "libgdk-pixbuf2.0-dev"
     "libdbusmenu-gtk3-dev" "libcairo2-dev" "libglib2.0-dev"
-    "libx11-dev" "libxrender-dev" "libxext-dev"
+    "libx11-dev" "libxrandr-dev" "libxrender-dev" "libxext-dev"
     "x11proto-dev" "xserver-xorg-dev" "zstd"
     "libxcb1-dev" "libxcb-randr0-dev" "libxcb-xinerama0-dev"
     "libxcb-icccm4-dev" "libxcb-ewmh-dev" "libxcb-util0-dev"

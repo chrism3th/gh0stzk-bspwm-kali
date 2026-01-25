@@ -113,10 +113,23 @@ PS1='%B%F{blue}%f%b  %B%F{magenta}%n%f%b $(dir_icon)  %B%F{red}%~%f%b${vcs_in
 #  ┌─┐┬  ┬ ┬┌─┐┬┌┐┌┌─┐
 #  ├─┘│  │ ││ ┬││││└─┐
 #  ┴  ┴─┘└─┘└─┘┴┘└┘└─┘
-source /usr/share/zsh/plugins/fzf-tab-git/fzf-tab.zsh
-source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
-source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
-source /usr/share/zsh/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+# Plugin loading (Debian/Kali friendly). Prefer user-local plugins, fall back to distro paths.
+source_if_exists() {
+  local file_path="$1"
+  [[ -f "$file_path" ]] && source "$file_path"
+}
+
+ZSH_PLUGIN_DIR="${ZSH_PLUGIN_DIR:-$HOME/.config/zsh/plugins}"
+
+# fzf-tab
+source_if_exists "$ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.plugin.zsh"
+source_if_exists "$ZSH_PLUGIN_DIR/fzf-tab/fzf-tab.zsh"
+source_if_exists "/usr/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
+source_if_exists "/usr/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
+
+# zsh-history-substring-search
+source_if_exists "$ZSH_PLUGIN_DIR/zsh-history-substring-search/zsh-history-substring-search.zsh"
+source_if_exists "/usr/share/zsh-history-substring-search/zsh-history-substring-search.zsh"
 
 bindkey '^[[A' history-substring-search-up
 bindkey '^[[B' history-substring-search-down
