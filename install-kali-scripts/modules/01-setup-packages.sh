@@ -117,7 +117,7 @@ apt_packages=(
     "mpd" "mpc" "ncmpcpp" "mpv"
 
     # Herramientas gráficas
-    "feh" "maim" "imagemagick"
+    "feh" "maim" "imagemagick" "webp-pixbuf-loader"
 
     # Editores y desarrollo
     "geany" "npm"
