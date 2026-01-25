@@ -7,6 +7,25 @@
 source "$(dirname "$(dirname "$0")")/common.sh"
 
 create_temp_dir
+touch "$ERROR_LOG" 2>/dev/null || true
+
+# --------------------------------------------
+# Logging helpers (do NOT hide command output)
+# --------------------------------------------
+# Run a command and:
+# - show stdout/stderr in terminal
+# - append stdout/stderr to $ERROR_LOG
+# - preserve the original exit code
+run_logged() {
+    "$@" 2>&1 | tee -a "$ERROR_LOG"
+    return ${PIPESTATUS[0]}
+}
+
+# Same as run_logged, but for complex shell pipelines.
+run_logged_sh() {
+    bash -c "$1" 2>&1 | tee -a "$ERROR_LOG"
+    return ${PIPESTATUS[0]}
+}
 
 # ============================================
 # INSTALACIÓN DE RUST Y CARGO
@@ -20,7 +39,7 @@ ensure_rust_and_cargo() {
 
         if command_exists rustup; then
             msg_info "Actualizando Rust a la última versión..."
-            if rustup update >> "$ERROR_LOG" 2>&1; then
+            if run_logged rustup update; then
                 msg_ok "Rust actualizado correctamente"
             else
                 msg_warning "No se pudo actualizar Rust (puede no ser crítico)"
@@ -33,7 +52,7 @@ ensure_rust_and_cargo() {
     msg_info "Instalando Rust..."
 
     # Prefer rustup, fall back to APT if rustup fails (network/TLS issues are common).
-    if curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y >> "$ERROR_LOG" 2>&1; then
+    if run_logged_sh 'curl --proto "=https" --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y'; then
         msg_ok "Rustup instalado correctamente"
         if [ -f "$HOME/.cargo/env" ]; then
             # shellcheck disable=SC1090
@@ -43,7 +62,7 @@ ensure_rust_and_cargo() {
         msg_warning "Fallo al instalar Rust con rustup, intentando instalar desde APT..."
         log_error "rustup falló; intentando APT (rustc cargo)"
 
-        if sudo apt install -y rustc cargo >> "$ERROR_LOG" 2>&1; then
+        if run_logged sudo apt install -y rustc cargo; then
             msg_ok "Rust instalado desde APT"
         else
             msg_warning "No se pudo instalar Rust/Cargo desde APT"
@@ -82,7 +101,7 @@ if [ "$HAS_CARGO" = true ] && command_exists cargo; then
         msg_ok "eza ya está instalado"
     else
         msg_info "Instalando eza..."
-        if cargo install eza >> "$ERROR_LOG" 2>&1; then
+        if run_logged cargo install eza; then
             msg_ok "eza instalado correctamente"
         else
             msg_warning "Fallo al instalar eza (no crítico)"
@@ -99,7 +118,7 @@ if [ "$HAS_CARGO" = true ] && command_exists cargo; then
         msg_ok "yazi ya está instalado"
     else
         msg_info "Instalando yazi (puede tomar varios minutos)..."
-        if cargo install --locked yazi-fm yazi-cli >> "$ERROR_LOG" 2>&1; then
+        if run_logged cargo install --locked yazi-fm yazi-cli; then
             msg_ok "yazi instalado correctamente"
         else
             msg_warning "Fallo al instalar yazi (no crítico)"
@@ -141,7 +160,7 @@ if [ "${COMPILE_EWW:-false}" = true ]; then
     msg_info "Clonando repositorio de eww..."
     EWW_DIR="$TEMP_DIR/eww"
 
-    if git clone --depth=1 https://github.com/elkowar/eww.git "$EWW_DIR" >> "$ERROR_LOG" 2>&1; then
+    if run_logged git clone --depth=1 https://github.com/elkowar/eww.git "$EWW_DIR"; then
         msg_ok "Repositorio clonado correctamente"
 
         cd "$EWW_DIR" || exit 1
@@ -149,13 +168,13 @@ if [ "${COMPILE_EWW:-false}" = true ]; then
         msg_info "Compilando eww (esto puede tomar 10-15 minutos)..."
         msg_warning "Por favor, ten paciencia..."
 
-        if cargo build --release --no-default-features --features x11 >> "$ERROR_LOG" 2>&1; then
+        if run_logged cargo build --release --no-default-features --features x11; then
             msg_ok "Compilación exitosa"
 
             if [ -f "target/release/eww" ]; then
                 chmod +x target/release/eww
 
-                if sudo cp target/release/eww /usr/local/bin/ 2>> "$ERROR_LOG"; then
+                if run_logged sudo cp target/release/eww /usr/local/bin/; then
                     msg_ok "eww instalado en /usr/local/bin/eww"
 
                     if command_exists eww; then
@@ -206,18 +225,18 @@ if [ "${COMPILE_XWIN:-false}" = true ]; then
     msg_info "Clonando repositorio de xwinwrap..."
     XWINWRAP_DIR="$TEMP_DIR/xwinwrap"
 
-    if git clone --depth=1 https://github.com/ujjwal96/xwinwrap.git "$XWINWRAP_DIR" >> "$ERROR_LOG" 2>&1; then
+    if run_logged git clone --depth=1 https://github.com/ujjwal96/xwinwrap.git "$XWINWRAP_DIR"; then
         msg_ok "Repositorio clonado correctamente"
 
         cd "$XWINWRAP_DIR" || exit 1
 
         msg_info "Compilando xwinwrap..."
 
-        if make >> "$ERROR_LOG" 2>&1; then
+        if run_logged make; then
             msg_ok "Compilación exitosa"
 
             if [ -f "xwinwrap" ]; then
-                if sudo make install >> "$ERROR_LOG" 2>&1; then
+                if run_logged sudo make install; then
                     msg_ok "xwinwrap instalado correctamente"
 
                     if command_exists xwinwrap; then
@@ -232,7 +251,7 @@ if [ "${COMPILE_XWIN:-false}" = true ]; then
                 log_error "Binario de xwinwrap no encontrado"
             fi
 
-            make clean >> "$ERROR_LOG" 2>&1
+            run_logged make clean || true
         else
             msg_error "Fallo durante la compilación de xwinwrap"
             msg_info "Revisa el log: $ERROR_LOG"
@@ -287,7 +306,7 @@ if [ "${COMPILE_I3LOCK:-false}" = true ]; then
 
     if [ ${#deps_to_install[@]} -gt 0 ]; then
         msg_info "Instalando ${#deps_to_install[@]} dependencias..."
-        if sudo apt install -y "${deps_to_install[@]}" >> "$ERROR_LOG" 2>&1; then
+        if run_logged sudo apt install -y "${deps_to_install[@]}"; then
             msg_ok "Dependencias instaladas correctamente"
         else
             msg_error "Error al instalar dependencias de i3lock-color"
@@ -301,7 +320,7 @@ if [ "${COMPILE_I3LOCK:-false}" = true ]; then
     msg_info "Clonando repositorio de i3lock-color..."
     I3LOCK_DIR="$TEMP_DIR/i3lock-color"
 
-    if git clone --depth=1 https://github.com/Raymo111/i3lock-color.git "$I3LOCK_DIR" >> "$ERROR_LOG" 2>&1; then
+    if run_logged git clone --depth=1 https://github.com/Raymo111/i3lock-color.git "$I3LOCK_DIR"; then
         msg_ok "Repositorio clonado correctamente"
 
         cd "$I3LOCK_DIR" || exit 1
@@ -311,18 +330,18 @@ if [ "${COMPILE_I3LOCK:-false}" = true ]; then
         # Usar el script de instalación provisto
         if [ -f "install-i3lock-color.sh" ]; then
             chmod +x install-i3lock-color.sh
-            if ./install-i3lock-color.sh >> "$ERROR_LOG" 2>&1; then
+            if run_logged ./install-i3lock-color.sh; then
                 msg_ok "i3lock-color instalado correctamente mediante script oficial"
             else
                 msg_warning "Script oficial falló, intentando método manual..."
                 log_error "install-i3lock-color.sh falló, probando método manual"
 
                 # Método manual
-                if ./build.sh >> "$ERROR_LOG" 2>&1; then
+                if run_logged ./build.sh; then
                     msg_ok "Compilación exitosa"
 
                     if [ -f "x86_64-pc-linux-gnu/release/i3lock" ]; then
-                        if sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color 2>> "$ERROR_LOG"; then
+                        if run_logged sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color; then
                             sudo chmod +x /usr/local/bin/i3lock-color
                             msg_ok "i3lock-color instalado en /usr/local/bin/i3lock-color"
                         else
@@ -343,11 +362,11 @@ if [ "${COMPILE_I3LOCK:-false}" = true ]; then
             msg_warning "Script de instalación no encontrado, usando método manual..."
 
             # Método manual clásico
-            if ./build.sh >> "$ERROR_LOG" 2>&1; then
+            if run_logged ./build.sh; then
                 msg_ok "Compilación exitosa"
 
                 if [ -f "x86_64-pc-linux-gnu/release/i3lock" ]; then
-                    if sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color 2>> "$ERROR_LOG"; then
+                    if run_logged sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color; then
                         sudo chmod +x /usr/local/bin/i3lock-color
                         msg_ok "i3lock-color instalado en /usr/local/bin/i3lock-color"
                     else
@@ -393,9 +412,9 @@ if command_exists tdrop; then
     msg_ok "tdrop ya está instalado"
 else
     TDROP_DIR="$TEMP_DIR/tdrop"
-    if git clone --depth=1 https://github.com/noctuid/tdrop.git "$TDROP_DIR" >> "$ERROR_LOG" 2>&1; then
+    if run_logged git clone --depth=1 https://github.com/noctuid/tdrop.git "$TDROP_DIR"; then
         cd "$TDROP_DIR" || exit 1
-        if sudo make install >> "$ERROR_LOG" 2>&1; then
+        if run_logged sudo make install; then
             msg_ok "tdrop instalado correctamente"
         else
             msg_warning "Error al instalar tdrop"
@@ -414,9 +433,9 @@ if command_exists xqp; then
     msg_ok "xqp ya está instalado"
 else
     XQP_DIR="$TEMP_DIR/xqp"
-    if git clone --depth=1 https://github.com/baskerville/xqp.git "$XQP_DIR" >> "$ERROR_LOG" 2>&1; then
+    if run_logged git clone --depth=1 https://github.com/baskerville/xqp.git "$XQP_DIR"; then
         cd "$XQP_DIR" || exit 1
-        if make >> "$ERROR_LOG" 2>&1 && sudo make install >> "$ERROR_LOG" 2>&1; then
+        if run_logged make && run_logged sudo make install; then
             msg_ok "xqp instalado correctamente"
         else
             msg_warning "Error al instalar xqp"
@@ -436,8 +455,8 @@ if command_exists greenclip; then
 else
     GREENCLIP_URL="https://github.com/erebe/greenclip/releases/download/v4.2/greenclip"
     GREENCLIP_DEST="/usr/local/bin/greenclip"
-    if wget -q "$GREENCLIP_URL" -O "$TEMP_DIR/greenclip" 2>> "$ERROR_LOG"; then
-        if sudo cp "$TEMP_DIR/greenclip" "$GREENCLIP_DEST" 2>> "$ERROR_LOG"; then
+    if run_logged wget "$GREENCLIP_URL" -O "$TEMP_DIR/greenclip"; then
+        if run_logged sudo cp "$TEMP_DIR/greenclip" "$GREENCLIP_DEST"; then
             sudo chmod +x "$GREENCLIP_DEST"
             msg_ok "greenclip instalado en $GREENCLIP_DEST"
         else
@@ -468,7 +487,7 @@ install_zsh_plugin() {
     fi
 
     msg_info "Instalando ${plugin_name}..."
-    if git clone --depth=1 "$repo_url" "$dest_dir" >> "$ERROR_LOG" 2>&1; then
+    if run_logged git clone --depth=1 "$repo_url" "$dest_dir"; then
         msg_ok "${plugin_name} instalado"
         return 0
     fi
@@ -505,14 +524,14 @@ install_jgmenu_from_source() {
 
     if [ ${#missing[@]} -gt 0 ]; then
         msg_info "Instalando dependencias de jgmenu (${#missing[@]})..."
-        if ! sudo apt install -y "${missing[@]}" >> "$ERROR_LOG" 2>&1; then
+        if ! run_logged sudo apt install -y "${missing[@]}"; then
             msg_warning "No se pudieron instalar todas las dependencias de jgmenu"
             log_error "Fallo al instalar dependencias de jgmenu: ${missing[*]}"
         fi
     fi
 
     rm -rf "$build_dir" 2>/dev/null || true
-    if ! git clone --depth=1 "$repo_url" "$build_dir" >> "$ERROR_LOG" 2>&1; then
+    if ! run_logged git clone --depth=1 "$repo_url" "$build_dir"; then
         msg_error "Fallo al clonar el repositorio de jgmenu"
         log_error "Git clone jgmenu falló"
         return 1
@@ -521,11 +540,11 @@ install_jgmenu_from_source() {
     cd "$build_dir" || return 1
 
     msg_info "Configurando jgmenu..."
-    if ! ./configure --prefix="$prefix" --with-lx --with-pmenu >> "$ERROR_LOG" 2>&1; then
+    if ! run_logged ./configure --prefix="$prefix" --with-lx --with-pmenu; then
         msg_warning "configure con --with-lx/--with-pmenu falló, intentando configuración mínima..."
         log_error "jgmenu configure con extras falló; reintentando sin extras"
 
-        if ! ./configure --prefix="$prefix" >> "$ERROR_LOG" 2>&1; then
+        if ! run_logged ./configure --prefix="$prefix"; then
             msg_error "No se pudo configurar jgmenu"
             log_error "jgmenu configure falló"
             cd - > /dev/null || true
@@ -534,7 +553,7 @@ install_jgmenu_from_source() {
     fi
 
     msg_info "Compilando jgmenu..."
-    if ! make >> "$ERROR_LOG" 2>&1; then
+    if ! run_logged make; then
         msg_error "Fallo durante la compilación de jgmenu"
         log_error "make jgmenu falló"
         cd - > /dev/null || true
@@ -542,7 +561,7 @@ install_jgmenu_from_source() {
     fi
 
     msg_info "Instalando jgmenu en ${prefix}..."
-    if ! make install >> "$ERROR_LOG" 2>&1; then
+    if ! run_logged make install; then
         msg_error "Fallo durante la instalación de jgmenu"
         log_error "make install jgmenu falló"
         cd - > /dev/null || true
@@ -570,7 +589,7 @@ if ! command_exists jgmenu; then
 
     if apt-cache show jgmenu &>/dev/null; then
         msg_info "Instalando jgmenu desde APT..."
-        if sudo apt install -y jgmenu >> "$ERROR_LOG" 2>&1; then
+        if run_logged sudo apt install -y jgmenu; then
             msg_ok "jgmenu instalado desde APT"
         else
             msg_warning "Fallo al instalar jgmenu desde APT, usando fallback desde fuente..."
