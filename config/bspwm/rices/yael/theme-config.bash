@@ -1,6 +1,8 @@
 #############################
 #		Yael Theme			#
 #############################
+# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# https://github.com/gh0stzk/dotfiles
 
 # (OxoCarbon) colorscheme
 bg="#161616"
@@ -23,8 +25,15 @@ magentab="#ff7eb6"
 cyanb="#3ddbd9"
 whiteb="#ffffff"
 
+accent_color="#212121"
+arch_icon="#0f94d2"
+
 # Bspwm options
 BORDER_WIDTH="0"		# Bspwm border
+TOP_PADDING="37"
+BOTTOM_PADDING="1"
+LEFT_PADDING="1"
+RIGHT_PADDING="1"
 NORMAL_BC="#33b1ff"		# Normal border color
 FOCUSED_BC="#42be65"	# Focused border color
 
@@ -48,8 +57,40 @@ dunst_transparency='0'
 dunst_corner_radius='6'
 dunst_font='JetBrainsMono NF Medium 9'
 dunst_border='0'
+dunst_frame_color="$blue"
+dunst_icon_theme="Candy"
+# Dunst animations
+dunst_close_preset="fly-out"
+dunst_close_direction="down"
+dunst_open_preset="fly-in"
+dunst_open_direction="down"
 
-# Gtk theme vars
+# Jgmenu colors
+jg_bg="$bg"
+jg_fg="$fg"
+jg_sel_bg="$blue"
+jg_sel_fg="$bg"
+jg_sep="$red"
+
+# Rofi menu font and colors
+rofi_font="JetBrainsMono NF Bold 9"
+rofi_background="$bg"
+rofi_bg_alt="$accent_color"
+rofi_background_alt="${bg}E0"
+rofi_fg="$fg"
+rofi_selected="$blue"
+rofi_active="$green"
+rofi_urgent="$red"
+
+# Screenlocker
+sl_bg="${bg}"
+sl_fg="${blue}"
+sl_ring="${bg}"
+sl_wrong="${red}"
+sl_date="${magenta}"
+sl_verify="${green}"
+
+# Gtk theme
 gtk_theme="OxoCarbon-zk"
 gtk_icons="Glassy"
 gtk_cursor="Qogirr-Dark"
@@ -57,11 +98,13 @@ geany_theme="z0mbi3-OxoCarbon"
 
 # Wallpaper engine
 # Available engines:
-# - Theme	(Set a random wallpaper from rice directory)
-# - CustomDir	(Set a random wallpaper from the directory you specified)
-# - CustomImage	(Sets a specific image as wallpaper)
-# - CustomAnimated (Set an animated wallpaper. "mp4, mkv, gif")
-ENGINE="Theme"
-CUSTOM_DIR="/path/to/dir"
-CUSTOM_WALL="/path/to/image"
-CUSTOM_ANIMATED="$HOME/.config/bspwm/src/assets/animated_wall.mp4"
+# - Random  (Set a random wallpaper from Walls rice directory)
+# - CustomDir   (Set a random wallpaper from the directory you specified)
+# - Default (Sets a specific image as wallpaper) *Default
+# - Animated (Set an animated wallpaper. "mp4, mkv, gif")
+# - Slideshow (Change randomly every 15 minutes your wallpaper from Walls rice directory)
+ENGINE="Default"
+
+CUSTOM_DIR="/path/to/your/wallpapers/directory"
+DEFAULT_WALL="$HOME/.config/bspwm/rices/yael/walls/wall-01.webp"
+ANIMATED_WALL="$HOME/.config/bspwm/config/assets/animated_wall.mp4"

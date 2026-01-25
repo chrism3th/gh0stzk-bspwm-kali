@@ -1,0 +1,124 @@
+#!/bin/sh
+# =============================================================
+# Author:  gh0stzk
+# Repo:    https://github.com/gh0stzk/dotfiles
+# Date:    21.11.2025
+#
+# Weather - Weather Monitor for Polybar/Eww
+# Features:
+#   ✔ Obtaining data in real time via API
+#   ✔ Smart cache system (15 minutes)
+#   ✔ Support for Celsius and Fahrenheit formats
+#   ✔ Handling of errors and connection failures
+#
+# Dependencies:
+#   → Core: jq, curl
+#   → Optionals: Polybar, Eww
+#
+# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Licensed under GPL-3.0 license
+# =============================================================
+
+# ===== Configuration =====
+KEY="8b05d62206f459e1d298cbe5844d7d87"
+CITY="Mexico City"  # Go to https://openweathermap.org/find to find your city/town
+UNITS="metric" # metric | imperial
+
+# Wait for internet
+wait_for_internet() {
+    while ! curl -fsS --max-time 5 https://google.com >/dev/null 2>&1; do
+        sleep 0.5
+    done
+}
+
+# Get weather
+get_weather_data() {
+    encoded_city=$(printf "%s" "$CITY" | sed 's/ /%20/g')
+    url="https://api.openweathermap.org/data/2.5/weather?q=$encoded_city&appid=$KEY&units=$UNITS"
+
+    curl -fsS --max-time 10 "$url"
+}
+
+# Parse data
+parse_weather_values() {
+    data=$1
+    W_TEMP=$(echo "$data" | jq -r '.main.temp | round')
+    W_FEELS=$(echo "$data" | jq -r '.main.feels_like | round')
+    W_DESC=$(echo "$data" | jq -r '.weather[0].description')
+    W_ICON=$(echo "$data" | jq -r '.weather[0].icon')
+}
+
+# Icons
+get_weather_icon() {
+    case "$1" in
+        "01d") echo "" ;;
+        "01n") echo "" ;;
+        "02d") echo "" ;;
+        "02n") echo "" ;;
+        "03d"|"03n") echo "" ;;
+        "04d"|"04n") echo "" ;;
+        "09d"|"09n") echo "" ;;
+        "10d") echo "" ;;
+        "10n") echo "" ;;
+        "11d"|"11n") echo "" ;;
+        "13d"|"13n") echo "" ;;
+        "50d"|"50n") echo "" ;;
+        *) echo "" ;;
+    esac
+}
+
+# Colors
+get_weather_hex() {
+    icon_prefix=$(echo "$1" | cut -c1-2)
+    case "$icon_prefix" in
+        "01") echo "#ffd86b" ;;
+        "02"|"03"|"04") echo "#adadff" ;;
+        "09"|"10") echo "#6b95ff" ;;
+        "11") echo "#ffeb57" ;;
+        "13") echo "#e3e6fc" ;;
+        "50") echo "#84afdb" ;;
+        *) echo "#adadff" ;;
+    esac
+}
+
+# Execution
+wait_for_internet
+weather_data=$(get_weather_data || exit 1)
+parse_weather_values "$weather_data"
+
+case "$1" in
+    "current_temp")
+        echo "$W_TEMP"
+        ;;
+    "current_temp_fahrenheit")
+        temp_f=$(expr \( "$W_TEMP" \* 9 / 5 \) + 32)
+        echo "${temp_f}°F"
+        ;;
+    "feels_like")
+        echo "${W_FEELS}°C"
+        ;;
+    "weather_desc")
+        echo "$W_DESC" | sed 's/.*/\u&/'
+        ;;
+    "icon")
+        get_weather_icon "$W_ICON"
+        ;;
+    "hex")
+        get_weather_hex "$W_ICON"
+        ;;
+    "full")
+        echo "$weather_data"
+        ;;
+    "city")
+        echo "$CITY"
+        ;;
+    "wmodule")
+        icon=$(get_weather_icon "$W_ICON")
+        hex=$(get_weather_hex "$W_ICON")
+        printf "%%{F%s}%s%%{F-} %s°\n" "$hex" "$icon" "$W_TEMP"
+        ;;
+    *)
+        echo "No valid option" >&2
+        exit 1
+        ;;
+esac

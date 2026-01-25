@@ -1,0 +1,103 @@
+#!/bin/sh
+# =============================================================
+# Script to control prefered apps to launch for all themes
+# Author:  z0mbi3
+# Repo:    https://github.com/gh0stzk/dotfiles
+# Date:    24.04.2025
+# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Licensed under GPL-3.0 license
+# =============================================================
+
+WIDGET_DIR="$HOME/.config/bspwm/eww"
+
+case "$1" in
+	--menu)
+		RofiLauncher --launcher
+		;;
+	--rice)
+		RiceSelector
+		;;
+	--terminal)
+		Term --terminal
+		;;
+	--floating)
+		Term --floating
+		;;
+	--update)
+		Term --update
+		;;
+	--checkupdates)
+		Term --checkupdates
+		;;
+	--netmanager)
+		NetManagerDM
+		;;
+	--pass)
+		RofiPass
+		;;
+	--bluetooth)
+		rofi-bluetooth
+		;;
+	--clipboard)
+		clipcat-menu
+		;;
+	--screenshot)
+		ScreenShoTer
+		;;
+	--powermenu)
+		PowerMenu
+		;;
+	--android)
+		AndroidMount
+		;;
+	--keyboard)
+		KeyBoardL
+		;;
+	--yazi)
+		Term --yazi
+		;;
+	--nvim)
+		Term --nvim
+		;;
+	--music)
+		Term --music
+		;;
+	--fetch)
+		Term --fetch
+		;;
+	--scratch)
+		Bspwm-ScratchPad
+		;;
+		# Apps
+	--filemanager)
+		thunar
+		;;
+	--browser)
+		firefox
+		;;
+	--editor)
+		geany
+		;;
+	--telegram)
+		telegram-desktop
+		;;
+	--whats)
+		firefox -new-tab https://web.whatsapp.com/
+		;;
+	--soundcontrol)
+		pavucontrol
+		;;
+		# Eww Widgets
+	--KeyHelp)
+		eww -c "$WIDGET_DIR" open --toggle csheet
+		;;
+	--usercard)
+		eww -c "$WIDGET_DIR" open --toggle launchermenu
+		;;
+	--player)
+		eww -c "$WIDGET_DIR" open --toggle music
+		;;
+	*)
+		echo "Invalid Option"
+		;;
+esac

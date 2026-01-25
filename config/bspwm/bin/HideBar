@@ -1,0 +1,75 @@
+#!/bin/sh
+# =============================================================
+# Author:  gh0stzk
+# Repo:    https://github.com/gh0stzk/dotfiles
+# Date:    03.02.2025 20:31:58
+#
+# HideBar - Hide polybar or eww bars for gh0stzk dotfiles
+# Dependencies:
+#   → bspwm, polybar, eww, xrandr
+#
+# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Licensed under GPL-3.0 license
+# =============================================================
+
+# Configuration
+read -r current_rice <"$HOME"/.config/bspwm/.rice
+THEME_CONFIG="$HOME/.config/bspwm/rices/$current_rice/theme-config.bash"
+eww_bar_path="$HOME/.config/bspwm/rices/$current_rice/bar"
+
+# Get padding value from theme-config.bash
+get_paddings() {
+    awk -F'"' '
+        /^TOP_PADDING/    { top = $2 }
+        /^BOTTOM_PADDING/ { bottom = $2 }
+        /^LEFT_PADDING/   { left = $2 }
+        /^RIGHT_PADDING/  { right = $2 }
+        END { print top, bottom, left, right }
+    ' "$THEME_CONFIG"
+}
+
+set_padding() {
+    bspc config top_padding "$1"
+    bspc config bottom_padding "$2"
+    bspc config left_padding "$3"
+    bspc config right_padding "$4"
+}
+
+is_eww_theme() {
+    [ "$current_rice" = "z0mbi3" ] || [ "$current_rice" = "andrea" ]
+}
+
+toggle_bar() {
+    action="$1"
+
+    if is_eww_theme; then
+        if [ "$action" = "hide" ]; then
+            eww -c "$eww_bar_path" close-all
+        else
+            monitors=$(xrandr --listmonitors | awk 'NR>1 {print $4}')
+            count=0
+            for m in $monitors; do
+                eww -c "$eww_bar_path" open bar --id "$m" --arg monitor="$m" --screen "$count"
+                count=$((count + 1))
+            done
+        fi
+    else
+        polybar-msg cmd "$action"
+    fi
+}
+
+toggle_bars() {
+    if [ "$1" = "hide" ]; then
+        set_padding 2 2 2 2
+        toggle_bar hide
+    else
+        set_padding $(get_paddings)
+        toggle_bar show
+    fi
+}
+
+case "$1" in
+    -h|--hide)   toggle_bars hide ;;
+    -u|--unhide) toggle_bars unhide ;;
+    *)	echo "Uso: $0 [-h|--hide] [-u|--unhide]" ;;
+esac

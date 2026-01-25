@@ -43,48 +43,81 @@ I already started writing the [**Wiki**](https://github.com/gh0stzk/dotfiles/wik
 ## 🚀 Features
 <img src="https://user-images.githubusercontent.com/67278339/221605474-21d65156-0cf7-485c-bd1a-40792c37817e.png" alt="Linux Fetch" align="right" width="450">
 
-**Change themes on the fly**
+#### Change themes on the fly
 
-<sup>You can switch themes instantly, with no need to restart your session or environment. With just one click, the change is applied immediately.</sup>
+You can switch themes instantly, with no need to restart your session or environment. With just one click, the change is applied immediately.
 
-**Consistency Across the Environment**
+#### Consistency Across the Environment
 
-<sup>Each theme not only changes the appearance of bspwm but also instantly transforms the color scheme in terminals (Alacritty & Kitty), eww widgets, polybar bars, notifications, gtk theme, launchers and more. Visual harmony is guaranteed in every corner of your system.</sup>
+Each theme not only changes the appearance of bspwm but also instantly transforms the color scheme in terminals (Alacritty & Kitty), eww widgets, polybar bars, notifications, gtk theme, launchers and more. Visual harmony is guaranteed in every corner of your system.
 
-**RiceEditor**
+#### Performance optimized
 
-<sup>Is an application designed to simplify the customization of your current theme. It allows you to easily adjust various visual and configuration aspects, tailoring your environment to your preferences without the need to manually edit configuration files.</sup>
+BSPWM is not a desktop environment (DE), and that’s exactly what makes it stand out in terms of lightweight performance. On my systems, my BSPWM-dotfiles environment starts with under **500 MB of RAM usage**. While these numbers don't tell the whole story, they do highlight the minimalist approach that a window manager should embrace.
 
-**Eww Widgets**
+It’s true that Wayland-based environments like Hyprland and Sway are modern and popular, but they come at a cost — for instance, Hyprland typically starts with nearly 1 GB of memory usage, which contradicts the idea of being truly lightweight.
 
-<sup>4 different widgets, including a calendar, music player, profile card and a cheatsheet. These widgets are not only functional but also instantly adapt to the color scheme of the selected theme.</sup>
+Thanks to the latest major update to Picom, we now have stable and lightweight animations on X11. Additionally, I’ve optimized my setup to avoid unnecessary service reloads. Unlike distributions such as Archcraft or other dotfiles in the web —which restart bspwm, sxhkd, picom, dunst, and others whenever the theme changes— my environment keeps these services running without interruption.
 
-**Jgmenu**
+It’s designed so that services/daemons which only need to be launched once do so correctly, and aren’t restarted every time a theme is switched. Changing the theme doesn’t require restarting bspwm, since it’s entirely possible to update its appearance using bspc without reloading the window manager.
 
-<sup>Explore an elegant right-click menu (Desktop) made with Jgmenu, which also syncs with themes for flawless visual consistency. </sup>
+In short, my setup is faster, smoother, and more stable than what’s provided by preconfigured distributions.
 
-**LockScreen**
+In addition, each theme can be configured independently — either by manually editing the theme’s configuration file or using my RiceEditor application. This ensures a high level of customization: if you want a minimalist setup for a specific theme, you can disable animations, shadows, rounded borders, or fading effects. On the other hand, if you prefer a more visually rich theme with all those features enabled, that’s fully supported as well. My dotfiles are built to provide that level of flexibility.
 
-<sup>The lockscreen automatically adapts to the active theme and offers two locking options: it can capture the current screen with a blur effect, or use a specific wallpaper depending on the selected theme.</sup>
+#### Multi-Monitor support
 
-**Variety of Wallpapers**
+If you have multiple monitors, BSPWM will automatically detect and configure up to 4 displays when launching with my dotfiles.
 
-<sup>Each login surprises you with a randomly selected wallpaper specifically tailored to the theme in use. But if surprises aren't your thing, our wallpaper menu lets you choose from over 5 exclusive wallpapers for each theme.</sup>
+If you connect an additional monitor while the session is already running, simply reload BSPWM using the `Super + Alt + r` key combination, and your monitors will be configured instantly.
 
-**Scratchpad**
+You can check the Wiki [👉 Monitors Setup](https://github.com/gh0stzk/dotfiles/wiki/Monitors-setup) if you want to edit the default layouts.
 
-<sup>A _scratchpad_ is a tool designed to provide quick, temporary access to applications or notes without disrupting the desktop workflow. When activated, the scratchpad appears over the current workspace, allowing the user to access applications like a terminal, text editor, or any configured tool. Minimizing it hides the scratchpad from view but keeps it running in the background, ready to be reopened with a simple keyboard shortcut.</sup>
+#### RiceEditor
 
-<sup>It's ideal for quick note-taking, running commands, or accessing auxiliary tools without losing focus on the current task.</sup>
+Is an application designed to simplify the customization of your current theme. It allows you to easily adjust various visual and configuration aspects, tailoring your environment to your preferences without the need to manually edit configuration files.
 
-**Visual Composition and Animations**
+#### Eww Widgets
 
-<sup>Each theme features a unique color palette, along with transparencies, shadows, and animations—all designed to maintain visual balance without impacting performance or overwhelming the environment.</sup>
+4 different widgets, including a calendar, music player, profile card and a cheatsheet. These widgets are not only functional but also instantly adapt to the color scheme of the selected theme.
 
-**Rofi Applets**
+#### Jgmenu
 
-<sup>7 Rofi applets to simplify your workflow:</sup>
+Explore an elegant right-click menu (Desktop) made with Jgmenu, which also syncs with themes for flawless visual consistency.
 
+#### LockScreen
+
+The lockscreen automatically adapts to the active theme and offers two locking options: it can capture the current screen with a blur effect, or use a specific wallpaper depending on the current theme.
+
+#### Wallpaper Engines
+
+My dotfiles support **5 different methods** for setting your favorite wallpaper:
+
+1. **Theme**: Sets a random wallpaper from the theme’s Walls directory. (Default)
+2. **CustomDir**: Sets a random wallpaper from a directory you specify.
+3. **CustomImage**: Sets a specific image as wallpaper.
+4. **CustomAnimated**: Supports animated wallpapers (.mp4, .mkv, .gif).
+5. **Slideshow**: Changes the wallpaper every 15 minutes with a random image from the theme’s Walls directory.
+
+Each option is **theme-specific**, meaning you can have an animated wallpaper in one theme, a static image in another, or a custom directory in a third — And all your settings will be preserved per theme. By default, all themes load a random wallpaper from their Walls folder.
+
+Check the wiki for more details: [👉 Wallpapers Configuration](https://github.com/gh0stzk/dotfiles/wiki/Wallpapers-Configuration)
+
+#### Scratchpad
+
+A _scratchpad_ is a tool designed to provide quick, temporary access to applications or notes without disrupting the desktop workflow. When activated, the scratchpad appears over the current workspace, allowing the user to access applications like a terminal, text editor, or any configured tool. Minimizing it hides the scratchpad from view but keeps it running in the background, ready to be reopened with a simple keyboard shortcut.
+
+It's ideal for quick note-taking, running commands, or accessing auxiliary tools without losing focus on the current task.
+
+#### Visual Composition and Animations
+
+Each theme features a unique color palette, along with transparencies, shadows, and animations—all designed to maintain visual balance without impacting performance or overwhelming the environment.
+
+#### Rofi Applets
+
+Rofi applets to simplify your workflow:
+
+- Wallpaper Selector - See the wiki [WallpaperSelector](https://github.com/gh0stzk/dotfiles/wiki/WallpaperSelector)
 - Network Manager
 - Bluetooth Controller
 - Clipboard Manager
@@ -92,22 +125,38 @@ I already started writing the [**Wiki**](https://github.com/gh0stzk/dotfiles/wik
 - Android MTP Manager
 - Power Menu
 - Keyboard Layout
+- Terminal Selector (Alacritty or Kitty)
+- Rofi app launcher style selector
+- Tab app switcher
+- Pass Manager (Using pass app)
 
-**Terminal Selection Menu**
+#### Neovim Setup
 
-<sup>Choose your preferred terminal emulator between alacritty and kitty through a simple menu. The selected terminal will be the default for your environment, with alacritty set as the default.</sup>
+Simple yet powerful neovim configuration with the following features:
 
-**Tmux Configuration**
+- Treesitter
+- Lsp servers
+- Completions [blink.nvim](https://github.com/Saghen/blink.nvim)
+- Formatting [conform.nvim](https://github.com/stevearc/conform.nvim)
+- Picker [Snacks-picker](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
+- Explorer [Snacks-explorer](https://github.com/folke/snacks.nvim/blob/main/docs/picker.md)
+- Tab Line [barbar.nvim](https://github.com/romgrk/barbar.nvim)
+- Statusline [lualine.nvim](https://github.com/nvim-lualine/lualine.nvim)
+- Autopairs [mini-autopairs](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-pairs.md)
+- Hipatterns [mini-hipatterns](https://github.com/echasnovski/mini.nvim/blob/main/readmes/mini-hipatterns.md)
+- Indent guides [Snacks-indent](https://github.com/folke/snacks.nvim/blob/main/docs/indent.md)
+- Dashboard [Snacks-dashboard](https://github.com/folke/snacks.nvim/blob/main/docs/dashboard.md)
+- WhichKey [which-key.nvim](https://github.com/folke/which-key.nvim)
 
-<sup>Benefit from a newly added tmux configuration and design, enhancing your terminal multiplexing experience.</sup>
+#### Optimized ZSH Configuration
 
-**Complete Neovim Setup**
+Optimized, native ZSH configuration. Not __Oh-My-Zsh__ or other bloated plugin managers. Some features:
 
-<sup>Immerse yourself in a fully configured Neovim setup with plugins, written in Lua, providing a simple but powerful and efficient code editing environment.</sup>
-
-**Optimized ZSH Configuration**
-
-<sup>Enjoy a complete and optimized configuration of ZSH with features such as autocompletion, syntax highlighting, history substring search, and a simple yet powerful and beautiful prompt. Elevate your command line experience to a new level of efficiency and aesthetics.</sup>
+- Fastest and optimized performance compinit function
+- Autocompletion
+- Syntax highlighting
+- History substring search
+- Fzf-tab completion with previews!!
 
 ---
 
@@ -212,26 +261,36 @@ I already started writing the [**Wiki**](https://github.com/gh0stzk/dotfiles/wik
 | :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
 |                                              Network Manager                                               |                                             Clipboard Manager                                              |
 
-| ![Shot-2024-11-09-153419](https://github.com/user-attachments/assets/4af56dfa-f61f-4b45-8350-d064fe67663a) | ![Shot-2024-11-09-153444](https://github.com/user-attachments/assets/9a5d86e3-d58c-4b26-bb3e-86ec4974261a) |
+| ![Shot-2024-11-09-153419](https://github.com/user-attachments/assets/4af56dfa-f61f-4b45-8350-d064fe67663a) | ![Shot-2024-11-09-153444](https://github.com/user-attachments/assets/fbd09603-8e8f-4cbb-a685-83a69a6d4c35) |
 | :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
 |                                             Bluetooth Manager                                              |                                              Terminal Manager                                              |
 
+| ![Shot-2025-04-08-084756](https://github.com/user-attachments/assets/835366c8-88c5-4daf-8260-5c822e27abc8) | ![Shot-2025-04-08-084924](https://github.com/user-attachments/assets/c32f3cdb-7a5a-4372-b6f2-3f4a09f50868) |
+| :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
+|                                              Tab app switcher                                              |                                              Rofi style selector                                           |
+
+| ![Shot-2025-04-08-084756](https://github.com/user-attachments/assets/59a84a0d-b471-444a-b4f9-091d4a0e51e2) |
+| :--------------------------------------------------------------------------------------------------------: |
+|                                              Rofi password manager                                         |
+
 ---
+
+### Rofi app launcher styles
+| ![Shot-2025-04-08-090012](https://github.com/user-attachments/assets/57ebcc98-73ea-4f76-bb2b-fe3f187be5e7) | ![Shot-2025-04-08-090041](https://github.com/user-attachments/assets/26361cd3-c3b4-48a2-a550-8df5cff120f5) | ![Shot-2025-04-08-090107](https://github.com/user-attachments/assets/16da6b0f-5a9e-4410-bb95-cb9fe696ce55) |
+| :---: | :---: | :---: |
+| Normal | Full | Minimal |
+
+### Fzf tab terminal completions with previews!
+
+| ![fzf tab](https://github.com/user-attachments/assets/2771e549-f7cc-44da-baf2-6c9fa299f0fb) |
+| :---: |
+| cd, ls, pacman, systemctl, kill, cat, commands with preview! |
 
 ### Eww widgets
 
-| ![ProfilePane](https://github.com/user-attachments/assets/07827cff-63b9-40db-b0ef-8c214a5d8ec3) |
-| :---------------------------------------------------------------------------------------------: |
-|                                          Profile Panel                                          |
-
-
-| ![Calendar](https://github.com/user-attachments/assets/5ffcff9e-0852-4d9f-83b5-4bce71e69f7c) |
-| :------------------------------------------------------------------------------------------: |
-|                                           Calendar                                           |
-
-| ![MusicPlayer](https://github.com/user-attachments/assets/b96c49a1-57d1-43e5-bff0-cab2e6b4d101) |
-| :---------------------------------------------------------------------------------------------: |
-|                                          Music Player                                           |
+| ![ProfilePane](https://github.com/user-attachments/assets/07827cff-63b9-40db-b0ef-8c214a5d8ec3) | ![MusicPlayer](https://github.com/user-attachments/assets/b96c49a1-57d1-43e5-bff0-cab2e6b4d101) |
+| :---: | :---: |
+| Profile Panel | Music Player |
 
 | ![Shot-2024-11-10-000520](https://github.com/user-attachments/assets/a0871d4e-5b2b-4e64-ae79-617feec71cf1) |
 | :--------------------------------------------------------------------------------------------------------: |
@@ -261,12 +320,6 @@ I already started writing the [**Wiki**](https://github.com/gh0stzk/dotfiles/wik
 
 https://github.com/user-attachments/assets/8e15cc1a-88b8-4a7e-a4de-e7da76021406
 
-## Tmux theme
-
-| ![ezgif com-animated-gif-maker](https://github.com/gh0stzk/dotfiles/assets/67278339/dd5f7261-0631-4a91-b584-51ca8859c197) |
-| :-----------------------------------------------------------------------------------------------------------------------: |
-|                                                        Tmux theme                                                         |
-
 ## Scratchpad
 
 https://github.com/user-attachments/assets/79764678-c519-4a41-a333-2a862a6d10f8
@@ -277,39 +330,28 @@ https://github.com/user-attachments/assets/79764678-c519-4a41-a333-2a862a6d10f8
 | :--------------------------------------------------------------------------------------------------: |
 |            The environment changes with each theme. In the gif: (Ranger, Thunar, Ncmpcpp)            |
 
-## App Launcher
-
-| ![App-Launcher](https://github.com/user-attachments/assets/e96d0ad2-a91a-48d4-8279-17f3d99a698d) |
-| :----------------------------------------------------------------------------------------------: |
-|                                           App Launcher                                           |
-
-### Firefox theme
-
-| Firefox theme - z0mbi3 Fox |
-|:-:|
-| <img src="https://github.com/gh0stzk/dotfiles/assets/67278339/9b956d3d-fc7b-49ca-b27f-dc6aa83d9e2f" alt="Firefox theme - z0mbi3-Fox" align="center"> |
-
 ### Neovim setup
 
 | Neovim setup |
 |:-:|
-|<img src="https://github.com/gh0stzk/dotfiles/assets/67278339/17a1eb30-437e-4bf2-980c-6a410eff76bb" alt="Neovim configuration" align="center">|
+| ![Neovim setup](https://github.com/user-attachments/assets/a70a0ebb-9921-4d2d-88f3-5eabdc5d10f9) |
 | Plugins included [Neovim setup wiki](https://github.com/gh0stzk/dotfiles/wiki/Neovim-setup) |
 
 ## Very useful keybindigs to know...
 
-| Keys                                                                                                                                                                                                     | Action                                                                |
-| :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------- |
-| <kbd>super</kbd> + <kbd>Enter</kbd><br><kbd>super</kbd> + <kbd>alt</kbd> + <kbd>Enter</kbd>                                                                                                              | Open a terminal<br>Open a floating terminal.                          |
-| <kbd>alt</kbd> + <kbd>@space</kbd>                                                                                                                                                                       | Display menu to select a theme.                                       |
-| <kbd>super</kbd> + <kbd>@space</kbd>                                                                                                                                                                     | Apps Menu.                                                            |
-| <kbd>super</kbd> + <kbd>alt</kbd> + <kbd>w</kbd>                                                                                                                                                         | Opens a menu to select a wallpaper.                                   |
-| <kbd>super</kbd> + <kbd>alt</kbd> + <kbd>h</kbd><br><kbd>super</kbd> + <kbd>alt</kbd> + <kbd>u</kbd>                                                                                                     | Hides bar/s<br>unhide bar/s                                           |
-| <kbd>super</kbd> + <kbd>alt</kbd> + <kbd>s</kbd>                                                                                                                                                         | Takes screenshot.                                                     |
-| <kbd>ctrl</kbd> + <kbd>alt</kbd> + <kbd>[plus,minus,t]</kbd>                                                                                                                                             | Changes transparency on focused window.                               |
-| <kbd>ctrl</kbd> + <kbd>super</kbd> + <kbd>alt</kbd> + <kbd>p</kbd><br><kbd>ctrl</kbd> + <kbd>super</kbd> + <kbd>alt</kbd> + <kbd>r</kbd><br><kbd>ctrl</kbd> + <kbd>super</kbd> + <kbd>alt</kbd> + <kbd>k | Power off computer<br>Restart computer<br>Brute kill a window/process |
-| <kbd>super</kbd> + <kbd>alt</kbd> + <kbd>r</kbd>                                                                                                                                                         | Restart bspwm.                                                        |
-| `alt` + `F1`                                                                                                                                                                                             | Show keybinds cheatsheet                                              |
+| Keys | Action |
+| :-------------------: | :---------------------------------------------------------------: |
+| `super` + `x` | Close Windows |
+| `super` + `Enter`<br>`super` + `alt` + `Enter` | Open a terminal<br>Open a floating terminal. |
+| `alt` + `@space` | Display menu to select a theme. |
+| `super` + `@space` | Apps Menu. |
+| `super` + `alt` + `w`| Opens a menu to select a wallpaper. |
+| `super` + `alt` + `h`<br>`super` + `alt` + `u` | Hides bar/s<br>unhide bar/s |
+| `super` + `alt` + `s` | Takes screenshot. |
+| `ctrl` + `alt` + `[plus,minus,t]` | Changes transparency on focused window. |
+| `ctrl` + `super` + `alt` + `p`<br>`ctrl` + `super` + `alt` + `r`<br>`ctrl` + `super` + `alt` + `k` | Power off computer<br>Restart computer<br>Brute kill a window/process |
+| `super` + `alt` + `r` | Restart bspwm. |
+| `alt` + `F1` | Show keybinds cheatsheet |
 
 And more.. You need to look sxhkdrc file for more, or press Alt + F1 for a cheatsheet.
 

@@ -1,6 +1,8 @@
 #############################
 #		Aline Theme			#
 #############################
+# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# https://github.com/gh0stzk/dotfiles
 
 # (Rose Pine Dawn) colorscheme
 bg="#faf4ed"
@@ -23,8 +25,15 @@ magentab="#907aa9"
 cyanb="#d7827e"
 whiteb="#575279"
 
+accent_color="$black"
+arch_icon="#0f94d2"
+
 # Bspwm options
 BORDER_WIDTH="0"		# Bspwm border
+TOP_PADDING="51"
+BOTTOM_PADDING="1"
+LEFT_PADDING="1"
+RIGHT_PADDING="1"
 NORMAL_BC="#286983"		# Normal border color
 FOCUSED_BC="#907aa9"	# Focused border color
 
@@ -48,8 +57,40 @@ dunst_transparency='8'
 dunst_corner_radius='6'
 dunst_font='Inconsolata Semi Condensed Bold 9'
 dunst_border='0'
+dunst_frame_color="$white"
+dunst_icon_theme="Gruvbox-Plus-Dark"
+# Dunst animations
+dunst_close_preset="fly-out"
+dunst_close_direction="up"
+dunst_open_preset="fly-in"
+dunst_open_direction="right"
 
-# Gtk theme vars
+# Jgmenu colors
+jg_bg="$bg"
+jg_fg="$fg"
+jg_sel_bg="$black"
+jg_sel_fg="$fg"
+jg_sep="$magenta"
+
+# Rofi menu font and colors
+rofi_font="JetBrainsMono NF Bold 9"
+rofi_background="$bg"
+rofi_bg_alt="$black"
+rofi_background_alt="${bg}E0"
+rofi_fg="$fg"
+rofi_selected="$cyan"
+rofi_active="$green"
+rofi_urgent="$yellow"
+
+# Screenlocker
+sl_bg="${bg}"
+sl_fg="${black}"
+sl_ring="${magenta}"
+sl_wrong="${red}"
+sl_date="${black}"
+sl_verify="${green}"
+
+# Gtk theme
 gtk_theme="RosePineDawn-zk"
 gtk_icons="Luv-Folders"
 gtk_cursor="Qogirr"
@@ -57,11 +98,13 @@ geany_theme="z0mbi3-RosePineDawn"
 
 # Wallpaper engine
 # Available engines:
-# - Theme	(Set a random wallpaper from rice directory)
-# - CustomDir	(Set a random wallpaper from the directory you specified)
-# - CustomImage	(Sets a specific image as wallpaper)
-# - CustomAnimated (Set an animated wallpaper. "mp4, mkv, gif")
-ENGINE="Theme"
-CUSTOM_DIR="/path/to/dir"
-CUSTOM_WALL="/path/to/image"
-CUSTOM_ANIMATED="$HOME/.config/bspwm/src/assets/animated_wall.mp4"
+# - Random  (Set a random wallpaper from Walls rice directory)
+# - CustomDir   (Set a random wallpaper from the directory you specified)
+# - Default (Sets a specific image as wallpaper) *Default
+# - Animated (Set an animated wallpaper. "mp4, mkv, gif")
+# - Slideshow (Change randomly every 15 minutes your wallpaper from Walls rice directory)
+ENGINE="Default"
+
+CUSTOM_DIR="/path/to/your/wallpapers/directory"
+DEFAULT_WALL="$HOME/.config/bspwm/rices/aline/walls/wall-01.webp"
+ANIMATED_WALL="$HOME/.config/bspwm/config/assets/animated_wall.mp4"

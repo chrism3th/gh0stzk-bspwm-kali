@@ -1,6 +1,6 @@
-require("full-border"):setup {
-	-- Available values: ui.Border.PLAIN, ui.Border.ROUNDED
-	type = ui.Border.ROUNDED,
+require("full-border"):setup()
+require("smart-enter"):setup {
+	open_multi = true,
 }
 
 Header:children_add(function()
@@ -10,4 +10,4 @@ Header:children_add(function()
 	return ui.Span(ya.user_name() .. "@" .. ya.host_name() .. ":"):fg("magenta")
 end, 500, Header.LEFT)
 
-require("git"):setup()
+

@@ -1,0 +1,99 @@
+#!/bin/sh
+# =============================================================
+# Author:  gh0stzk
+# Repo:    https://github.com/gh0stzk/dotfiles
+# Date:    24.04.2025
+#
+# AnimateWall - Animated Wallpaper for BSPWM
+# Info:  Script to set animated backgrounds using
+#        xwinwrap and mpv. Supports automatic aspect ratio adjustment.
+#
+# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Licensed under GPL-3.0 license
+# =============================================================
+
+start() {
+    video_path="$1"
+
+    case "$video_path" in
+        *.mp4|*.mkv|*.gif) ;;
+        *)
+            echo "[-] The file does not have a valid video extension"
+            exit 1
+        ;;
+    esac
+
+    # Get full geometry of each screen (ex: "1920x1080+1366+0")
+    SCREENS=$(xrandr | grep -Eo '[0-9]+x[0-9]+\+[0-9]+\+[0-9]+')
+
+    gcd() {
+        a="$1" b="$2"
+        while [ "$b" -ne 0 ]; do
+            temp="$b"
+            b=$((a % b))
+            a=$temp
+        done
+        echo "$a"
+    }
+
+    for geometry in $SCREENS; do
+        # Extract resolution and coordinates
+        resolution=$(echo "$geometry" | cut -d'+' -f1)
+        width=$(echo "$resolution" | cut -d'x' -f1)
+        height=$(echo "$resolution" | cut -d'x' -f2)
+
+        # Calculate aspect ratio
+        g=$(gcd "$width" "$height")
+        aspect_width=$((width / g))
+        aspect_height=$((height / g))
+
+        case "${aspect_width}:${aspect_height}" in
+            "8:5") videoaspect="16:10" ;;
+            "4:3") videoaspect="4:3" ;;
+            "16:9") videoaspect="16:9" ;;
+            "21:9") videoaspect="21:9" ;;
+            *) videoaspect="${aspect_width}:${aspect_height}" ;;
+        esac
+
+        # INFO: for each screen, launch the video with the appropriate aspect ratio
+        xwinwrap -g "$geometry" -un -fdt -ni -b -nf \
+            -- mpv --hwdec=auto -vo x11 --no-audio --no-border --no-config \
+            --no-window-dragging --no-input-default-bindings --no-osd-bar \
+            --no-sub --loop -wid WID \
+            --video-aspect-override="$videoaspect" --video-scale-x=1 --video-scale-y=1 \
+            "$video_path" > /dev/null 2>&1 &
+    done
+}
+
+stop() {
+    killall xwinwrap > /dev/null 2>&1
+}
+
+print_help() {
+    echo "Usage: AnimatedWall [--start] [--stop] video_path"
+    echo "    --start   Start playback of video file."
+    echo "    --stop    Stop active playback."
+}
+
+if [ "$#" -eq 0 ]; then
+    print_help
+    exit 1
+fi
+
+while [ "$#" -gt 0 ]; do
+    case $1 in
+        --start)
+            shift
+            start "$1"
+            shift
+            ;;
+        --stop)
+            shift
+            stop
+            ;;
+        *)
+            echo "Unknown parameter: $1"
+            exit 1
+            ;;
+    esac
+done

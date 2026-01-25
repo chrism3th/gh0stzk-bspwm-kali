@@ -1,3 +1,343 @@
+## feat - Minimizing like... windows in bspwm
+##### 12 Nov 2025
+
+**New**
+I added a feature to make it appear as if the windows are "minimized," but they actually hide.
+
+Then a menu appears with images of your "minimized" windows, allowing you to select one and restore it.
+
+It's basically another method for hiding and showing windows, but with a nice menu.
+
+I got the idea from https://github.com/ArnaudLelievre48/Minimizing-BSPWM, all credit to him.
+
+https://github.com/user-attachments/assets/9e368822-f98d-4102-9c09-835751887c86
+
+## Feat - Dynamic rofi image header. - Modularized Theme.sh
+##### 10 Nov 2025
+
+**New**
+- The header image of the Rofi app launcher is now dynamic and changes according to the wallpaper you've set. It works with all wallpaper engines, even if you set an animated wallpaper.
+
+https://github.com/user-attachments/assets/57b45df5-9124-4a62-9416-fd1ed011fdc1
+
+- I've modularized Theme.sh, making it much easier to change the appearance of applications.
+
+For example, if you don't use the Kitty terminal and don't need its appearance to change every time you change the theme, simply delete the xx-kitty.sh file from the ~/.config/bspwm/config/modules/ directory.
+
+Similarly, if you want mpv to change its appearance every time you change the theme, just add a file called xx-mpv.sh to the same directory with the necessary code. Remember that you change colors, among other things, in the theme-config.bash file located within each theme.
+
+## New St terminal supported as a choice
+##### 04 Nov 2025
+
+**New:**
+
+I added my own build of the Suckless ST terminal as an option. Why?
+
+Because Alacritty doesn't support ligatures or native image protocol.
+
+And while Kitty does support these features, I don't use it and it seems like bloat to me.
+
+With that in mind, Alacritty and Kitty are GPU-accelerated, a trend in new terminals. Very nice and all, but do you really need your terminal to be GPU-accelerated?
+I don't, and with that in mind, I made my build of the ST terminal, which is initially old and archaic, but with the necessary and indicated patches, you can make it a modern, functional, and very, very fast terminal.
+
+I already have a repository dedicated to my ST build, if you want to take a look. https://github.com/gh0stzk/st-terminal
+But if you are installing first time my dots, the terminal will be installed automatically, if you dont, you can install whith sudo pacman st-gh0stzk
+
+### Patches included in this setup
+
+- [Kitty graphics protocol](https://github.com/sergei-grechanik/st-graphics) - Images in your terminal, just like kitty, just like a modern terminal emulator.
+- [Boxdraw](https://st.suckless.org/patches/boxdraw)
+- [xresources with signal reloading](https://st.suckless.org/patches/xresources-with-reload-signal/) - Configure st via Xresources and signal reloading.
+- [Scrollback](https://st.suckless.org/patches/scrollback)
+- [Wide glyph support](https://st.suckless.org/patches/glyph_wide_support/) - Fixes wide glyphs truncation
+- [Ligatures](https://st.suckless.org/patches/ligatures) - Proper drawing of ligatures.
+- [Appsync](https://st.suckless.org/patches/sync/) - Better draw timing to reduce flicker/tearing and improve animation smoothness.
+- [Blinking cursor](https://st.suckless.org/patches/blinking_cursor/) - Allows the use of a blinking cursor.
+- [Desktop entry](https://st.suckless.org/patches/desktopentry/) - This enables to find st in a graphical menu and to display it with a nice icon.
+- [Drag n drop](https://st.suckless.org/patches/drag-n-drop/) - This patch adds [XDND Drag-and-Drop](https://www.freedesktop.org/wiki/Specifications/XDND/) support for st.
+- [Dynamic cursor color](https://st.suckless.org/patches/dynamic-cursor-color/) - Swaps the colors of your cursor and the character you're currently on (much like alacritty).
+- [Bold is not bright](https://st.suckless.org/patches/bold-is-not-bright/) - This patch makes bold text rendered simply as bold, leaving the color unaffected.
+- [swap mouse](https://st.suckless.org/patches/swapmouse/) - This patch changes the mouse shape to the global default when the running program subscribes for mouse events, for instance, in programs like ranger, yazi and fzf.
+- [Unfocused-cursor](https://st.suckless.org/patches/unfocused_cursor/) - Removes the outlined rectangle, making the cursor invisible when the window is unfocused.
+
+![Shot-2025-05-01-102324](https://github.com/user-attachments/assets/d4f322e2-405d-4111-a395-f469cd2ddc9f)
+
+||Alacritty|St|Kitty|
+|:-|:-:|:-:|:-:|
+|GPU Accelerated|:white_check_mark:||:white_check_mark:|
+|Ligatures||:white_check_mark:|:white_check_mark:|
+|Image Protocol||:white_check_mark:|:white_check_mark:|
+|Fast & Lightweight|:white_check_mark:|:white_check_mark:||
+
+- The terminal select launcher has been updated, you can now select alacritty, kitty and the new st terminal. And now with images
+
+![Shot-2024-11-09-153444](https://github.com/user-attachments/assets/fbd09603-8e8f-4cbb-a685-83a69a6d4c35)
+
+- New applet rofi to manage your passwords using "pass" app. Yo can create, edit, delete, show, and a auto-type function. (Super + Alt + x)
+
+![Shot-2025-04-08-084756](https://github.com/user-attachments/assets/59a84a0d-b471-444a-b4f9-091d4a0e51e2)
+
+---
+
+## changes
+##### 12 Oct 2025
+
+- RiceInstaller
+  - Fix picom var if is a virtual machine
+  - Refactored the way apps are installed. A missing_apps.txt file is created in your home.
+  - The same goes for the backup and copy process.
+- Removed tmux config
+- Removed xqp dependency, now another method is used to show jgmenu when right clicking on the desktop.
+- Change KeyboardLayout rofi script https://github.com/gh0stzk/dotfiles/issues/542
+- Removed eww calendar widget
+- Date module in polybar changed, returns to its default behavior
+- Minor visual fixes/improvements to some polybar modules in some themes
+- The behavior of the WallSelect script has been modified. Now, when you select a wallpaper, the wallpaper engine also switches to static, and every time you restart, change themes, and return to the theme where you made the change, the selected wallpaper will remain. Previously, even if you selected a wallpaper, when you restarted or changed themes and returned to the one you changed, the wallpaper engine would remain on random.
+- Remove the alacritty themes. Changes to the color scheme are made as before using theme.sh and theme-config.bash.
+I'm trying to simplify and unify where you make changes so it's easier to create your own theme or make modifications.
+
+---
+
+## refactor: reorganize project structure
+##### 18 Sept 2025
+
+- refactor: reorganize project structure (move binaries to bin and configs to config)
+  - chore: cleanup src folder and separate configs into config/ and scripts into bin/
+- Fix disconnected monitors aren’t explicitly turned off in the MonitorSetup script.
+- Updated to last version rofi-bluetooth script
+- Updated to last version Networkmanager script
+- Removed firefox theme.
+
+## Removed unnecessary code to calculate icon sizes
+##### 27 July 2025
+
+### Change
+
+- Removed unnecessary code to calculate icon sizes in RiceSelector, WallSelector, and RofiStyleSelector.
+- Add more advanced keybinds for multi operation functions.
+  - Close/Kill all unfocused local windows
+  - Bring all marked windows to the focused desktop
+  - Bring everything from desktop X to the current desktop
+
+### To-Do
+
+- Dinamic desktops
+
+---
+
+## New Updates script, new rofi tab app switcher, new neovim setup, new rofi app launcher style
+##### 08 April 2025
+
+### New
+- Updates script (Fix)
+  - Previously, in setups with multiple monitors, the polybar/eww module wasn't synchronized, and each bar displayed different data. This is because the same script was running simultaneously on different bars/monitors, and Pacman would crash if two instances of it were running at the same time and only one bar displayed the correct data.
+  - To fix this, I modified the script so that it writes a file with the available updates, and the polybar/eww module reads it instead of running the script each time. And to prevent more than one instance of the script from running at the same time, I added a systemd timer/service that runs every 15 minutes. When it receives the information, it sends a signal to polybar and/or eww to update the data.
+  - I also added a pacman hook so that when you update your system, it sends a signal to update the polybar or eww module.
+
+If you perform a clean install with the script, you won't need to do anything. But if you want to apply the changes manually, follow these steps:
+
+- Clone my repository wherever you want.
+- Copy/overwrite the new "Updates" script from ..dotfiles/config/bspwm/src/ to $HOME/.config/bspwm/src/
+- Copy the 2 "ArchUpdates.timer" and "ArchUpdates.service" units from ..dotfiles/config/systemd/user/ to $HOME/.config/systemd/user/
+If the directory doesn't exist, create it.
+- Copy the Pacman hook "polybar-update.hook" from ..dotfiles/misc/ to /etc/pacman.d/hooks/ If the directory doesn't exist, create it and you need root permissions.
+- Now for the tedious part: you need to modify the update module in each theme. For those using polybar in  modules.ini, for themes with eww copy the .yuck file.
+
+Finally, enable the service
+`systemctl --user enable --now ArchUpdates.timer`
+
+- New rofi tab switcher `Alt + Tab`
+
+![Shot-2025-04-08-084756](https://github.com/user-attachments/assets/835366c8-88c5-4daf-8260-5c822e27abc8)
+
+- Changed some keybinds for moving/resize windows, now feels smooth.
+- Added a new keybind for floating windows to zoom in/out. It's similar to the new keybind for resizing. But looks nice.
+- Before you could only hide one window with `Alt + h`, now you can hide as many as you want and show them again one by one with `Ctrl + Alt + h`
+- New keybind to balance nodes with `Ctrl + Super + b`
+
+- New Minimal rofi app launcher style
+
+![Shot-2025-04-08-090107](https://github.com/user-attachments/assets/16da6b0f-5a9e-4410-bb95-cb9fe696ce55)
+
+- And of course i update the style selector for rofi launcher.
+- Firefox update, breaks (again) tabs below url bar. I fix it..
+- Updated RicesInstaller for new Updates system
+- Updates eww widget profilecard for new updates system
+
+---
+
+## New scratchpad, fzf-tab completion, rofi launcher styles, new slideshow wallpaper engine option.
+##### 20 March 2025
+
+#### New
+- **Scratchpad**
+  - I removed tdrop to create scratchpads. In a multi-monitor setup, the scratchpad wouldn't resize depending on the monitor and would appear in the wrong position when switching between monitors.
+So I created my own script, and now the scratchpad automatically resizes depending on the monitor and appears in the correct position. You can still launch it with `Super + Alt + o`
+- **Rofi launcher styles and a style selector**
+  - New style for the rofi app launcher and a new menu for selecting styles. I just added one more to the existing one, making it two now. If you'd like, you can send me your theme and I'll add it. You can open the new style selector menu with `super + alt + l`
+  - I also modified/optimized the images used in rofi, the rofi.webp file within each theme.
+
+| <img src="https://github.com/user-attachments/assets/6748b7b4-ee32-4e86-8cd8-e766c602469f" alt="Bspwm theme" width="700"> |
+| :-----------------------------------------------------------------------------------------------------------------------: |
+|                                                               New Style 2                                                 |
+
+| <img src="https://github.com/user-attachments/assets/4caa55e5-ed28-42a2-9411-cf518d663d25" alt="Bspwm theme" width="700"> |
+| :-----------------------------------------------------------------------------------------------------------------------: |
+|                                                     Style selector menu                                                   |
+
+- **fzf-tab completion**
+  - Add fzf-tab for autocompletion in the terminal. Fzf was recently updated with improvements to the layout, and I wanted to take advantage of it.
+  - How to use it? Just do the usual to autocomplete commands, for example: `cd <TAB>` `ls <TAB>` `cat <TAB>` `sudo pacman <TAB>` etc..
+  - Added an option to disable or enable fzf-tab in RiceEditor app, under General options.
+    - ![Shot-2025-03-19-232609](https://github.com/user-attachments/assets/f81fcdd7-5d4a-4523-8877-f80653030a01)
+
+  - Tab completions with **previews!!**
+    - ![Shot-2025-03-13-094232](https://github.com/user-attachments/assets/ea04373c-2fbd-4ba3-98f9-7ebbca185d70)
+    - ![Shot-2025-03-13-094541](https://github.com/user-attachments/assets/bb82419c-ad61-4821-89f2-aded56d17c32)
+    - ![Shot-2025-03-13-094638](https://github.com/user-attachments/assets/fe1e8fad-4787-454b-98a6-85e5cb97889c)
+    - ![Shot-2025-03-13-094805](https://github.com/user-attachments/assets/8c3cde3d-bbcc-44d4-afa7-8fe28a735973)
+    - ![Shot-2025-03-13-094933](https://github.com/user-attachments/assets/3ce88142-7a84-4b77-931d-025e2d579831)
+    - ![Shot-2025-03-13-095138](https://github.com/user-attachments/assets/8074dc24-5bd7-4e65-afb6-fc6c9bcbba52)
+
+- **New Slideshow option for wallpaper engine**
+  - Now you can select a new option in RiceEditor called Slideshow, this will change your wallpaper randomly every 15 minutes.
+  - Only wallpapers in rice Walls directory.
+    - ![Shot-2025-03-19-201032](https://github.com/user-attachments/assets/387b40d5-3164-45e0-9083-806beb6adf08)
+
+_I set this example to change every 10 seconds but default is 15 minutes_
+
+https://github.com/user-attachments/assets/666047b2-6b81-4ef7-baf5-80ebe2f89a78
+
+#### Fixed/Optimized/Updated
+- Mediacontrol --status command optimized (less pipes)
+- Updated OpenApps, picom.conf and animations, sxhkdrc, for new scratchpad and launcher config.
+- Ncmpcpp config updated, now starts on song list, not in playlist.
+- Betterfox updated
+- Removed tdrop from dependencies and added fzf and fzf-tab-git in RiceInstaller
+- Updated and optimized MonitorSetup. Automatically configure up to 4 connected monitors.
+- .zshrc updated for fzf-tab function.
+- Added, removed several wallpappers to most of the themes.
+- TTF-Maple was updated in the AUR and broke the Varinka theme. I removed the font from dependencies and it won't install anymore. Instead, I added the font to the fonts directory. I've made the necessary changes in polybar to fix this. So please uninstall the font if you already have it installed and add the font to your directory.
+- Changed again notify-send to dunstify in scripts.
+- Fix artifacts when you select an area taking a screenshot with ScreenShoter.
+
+#### To-Do
+- In setups with more than 1 monitor, the update module in polybar does not sync in one of the polybars, this happens because both processes are running at the same time, and PACMAN locks the database, and one module displays incorrect information. I'm trying to figure out how to fix this. Any ideas are welcome.
+
+
+---
+
+
+## Some changes to Theme.sh
+##### 01 March 2025
+
+- Removed Process.bash and wallengine.bash. Trying to make the dotfiles more understandable for newbie people, the functions that were executed in those files are now directly executed in Theme.sh
+- Updated Yazi config.
+
+## Installer update
+##### 17 Feb 2025
+
+I have completely updated the installer.
+
+- Chaotic-Aur is added and used trying to make the installation faster.
+
+- Now it checks if you are in a VM and changes the picom backend.
+
+- The logic was improved and now the installation should finish in approximately 5 minutes. Before 20+ minutes.
+
+## Updated scripts
+##### Febrero 7 2025
+
+I updated some scripts, in some the logic and reliability were improved and I tried to improve the performance of some.
+- bluetooth.sh: Improved code
+- Brightness: Improved logic and code.
+- HideBar: Improved code.
+- MonitorSetup: It's now faster and I try to create as few subshells as possible, and the biggest change is that it now only supports 1-3 monitors which makes it easier to edit for anyone who wants to add or modify more monitors.
+
+The 3 default layouts are:
+
+[Monitor 1]
+
+[Monitor 1] -> [Monitor 2]
+
+[Monitor 2] <- [Monitor 1] -> [Monitor 3]
+
+- RiceSelector: Code improved
+- ScreenShoter: Improved code in last commit but i documented here. (Multi monior support) default behavior is take screenshots from the focused monitor. If you wanna take screenshot from all monitors a new option for that is available.
+- SetSysVars: Improved code.
+- SoftReload: Improved code
+- Updates: Improved the logic and code, i tried to make it faster and now only shows availables updates from official or aur.
+- Volume: Improved code
+- WallSelect: Improved code and logic. Now uses a parallel image processing to optimize CPU usage.
+  - Now uses XXHash64 checksum wich is faster.
+  - Orphaned cache detection and cleanup
+  - Lockfile system for safe concurrent operations
+  - Yep now generation of cache images are faster.
+- Weather: The code and logic are optimized.
+   - Now uses a cache system, so less cpu usage.
+
+In andrea rice, the dubdirectory for eww bar, now is renamed to bar, to make life easier for HideBar script and others.
+
+Removed HideNode script, now sxhkd handles that.
+
+---
+
+## functional multimonitor support
+##### January 22 2025
+
+- New
+  - Multimonitor support and automatic bspwm workspaces configuration.
+
+https://github.com/user-attachments/assets/53893784-1eb3-4ebb-b96b-3fbbd1c4fc93
+
+Basically you don't have to do anything. The main monitor is configured, if there are more monitors connected, they will be aligned to the right of the main one and so on.
+
+It also auto-configures the workspaces in bspwm.
+If you have a single monitor you will have the same 6 workspaces as you have always had. If you have 2 monitors you will have 8 workspaces distributed across the 2 monitors, 4 and 4.
+If you have 3 monitors, you will have 9 workspaces divided into 3 per monitor. and so on.
+
+I only tested with 2 monitors, but may work with 3 and more all the setup.
+
+- Fixes
+  - Fixed Hidebar in Andrea and z0mbi3, the latest commit to fix multimonitor in those themes, breaks the HideBar feature.
+  - The Theme selector and wallpaper selector, now display correctly in size, depending on the monitor it is opened on.
+  - Its not a fix, just edited sxhkd to work properly with multimonitor.
+
+- Edited
+  - Aline, Cristina, Cyntbhia, Daniela, Jan, Karla, Varinka, Yael rices edited. I added the 3 missing workspaces.
+
+- Removed
+  - In ExternalRules file, i removed the feature to open floating terminals based in percentage.
+
+And thats it, i need to edit the ScreenShot script, to adapt it to new multimonitor, to take only active monitor or all monitors. But at some point in 2025 I will do it.
+
+Now yes, the dotfiles are coming to the end, there will always be things to add/improve but I think it's enough.
+I just have another functionality to add floating around in my head.
+**Save your bspwm sessions, and when you need it, open a saved session with all your apps and processes that you were running.**
+
+---
+
+## File structure changes
+##### January 16 2025
+
+- I have changed the structure of how themes are loaded, now instead of having a Theme.sh for each theme, now there is only one located in ~/.config/bspwm/src/ and everything you need to modify is in theme-config.bash, all the configuration is in variables. To load the theme bars, there is now a file called Bar.bash within each theme, that is, to modify or create new themes, what you will have to modify is theme-config.bash and Bar.bash within each theme .
+
+All this to make creating/editing themes less tedious and tiring and not having to edit theme.sh 18 times.
+
+- I put the terminal selector back, with alacritty and kitty. Be sure you add all theme files to the themes directory within kitty's configuration.
+
+- I plan to add ghostty instead kitty but on 2 of my machines, ghostty make my cpus works at 100% load.. i think i will wait few months more.
+
+## Scratchpads update
+##### December 16 2024
+
+- Fix scratchpad only open withg alacritty terminal
+- Added new scratchpad that will open a Yazi session `Super + alt + y`
+
+Note: If you open a scratchpad session with a terminal (alacritty or kitty), and then change terminal and reopen the scratchpad, the previous session you had will not open, it will open a new session, that is, you will already have 2 open scratchpad sessions . And if you return to the previous terminal and open the scratchpad, the first session you had started will open.
+
+It would be great if the session was maintained regardless of whether you change terminals or not, but I don't think it's possible, but if anyone knows how, a pull request is welcome.
+
 ## Animated Wallpapers
 ##### December 08 2024
 
