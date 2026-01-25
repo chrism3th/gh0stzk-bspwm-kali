@@ -89,7 +89,7 @@ else
     msg_error "Error al actualizar paquetes (ver $ERROR_LOG)"
 fi
 
-# Lista de paquetes APT
+# Lista de paquetes APT (corregidos para Kali Linux)
 apt_packages=(
     # Build tools
     "build-essential" "git" "curl" "wget" "pkg-config" "gcc" "libc6-dev"
@@ -101,7 +101,7 @@ apt_packages=(
     "alacritty" "kitty"
 
     # File managers
-    "thunar" "tumbler" "gvfs-mtp"
+    "thunar" "tumbler" "gvfs-backends"
 
     # Herramientas de sistema
     "brightnessctl" "playerctl" "pamixer" "pulseaudio-utils"
@@ -110,8 +110,8 @@ apt_packages=(
     # Utilidades CLI modernas
     "bat" "fzf" "neovim" "tmux"
 
-    # Clipboard manager (reemplazo de clipcat)
-    "copyq"
+    # Clipboard manager
+    "xfce4-clipman"
 
     # Media players
     "mpd" "mpc" "ncmpcpp" "mpv"
@@ -135,7 +135,7 @@ apt_packages=(
     "fonts-inconsolata" "fonts-ubuntu"
 
     # Herramientas adicionales
-    "jq" "webp-pixbuf-loader"
+    "jq" "webp"
 
     # Shell
     "zsh" "zsh-autosuggestions" "zsh-syntax-highlighting"
@@ -143,14 +143,16 @@ apt_packages=(
     # Navegador
     "firefox-esr"
 
-    # MTP y lock
-    "simple-mtpfs" "i3lock-color"
+    # MTP
+    "libmtp-runtime" "libmtp-common"
 
-    # Dependencias para compilación posterior
-    "libgtk-3-dev" "libpango1.0-dev" "libgdk-pixbuf-xlib-2.0-dev"
+    # Dependencias para compilación posterior (corregidos)
+    "libgtk-3-dev" "libpango1.0-dev" "libgdk-pixbuf2.0-dev"
     "libdbusmenu-gtk3-dev" "libcairo2-dev" "libglib2.0-dev"
     "libx11-dev" "libxrender-dev" "libxext-dev"
-    "x11proto-xext-dev" "xorg-dev" "zstd"
+    "x11proto-dev" "xserver-xorg-dev" "zstd"
+    "libxcb1-dev" "libxcb-randr0-dev" "libxcb-xinerama0-dev"
+    "libxcb-icccm4-dev" "libxcb-ewmh-dev" "libxcb-util0-dev"
 )
 
 msg_info "Se instalarán ${#apt_packages[@]} paquetes"
@@ -168,17 +170,61 @@ for pkg in "${apt_packages[@]}"; do
     current=$((current + 1))
     progress_bar "$total" "$current"
 
+    # Mostrar paquete actual
+    echo
+    printf "${BLD}${CYE}[%3d/%3d]${CNC} Verificando: ${BLD}%s${CNC}\n" "$current" "$total" "$pkg"
+
     if is_installed "$pkg"; then
         already_installed+=("$pkg")
+        printf "          ${BLD}${CCY}→${CNC} Ya instalado\n"
+        log_info "Paquete ya instalado: $pkg"
         continue
     fi
 
-    if sudo apt install -y "$pkg" >> "$ERROR_LOG" 2>&1; then
+    # Verificar si el paquete existe en los repositorios
+    if ! apt-cache show "$pkg" &>/dev/null; then
+        failed+=("$pkg")
+        printf "          ${BLD}${CRE}✗${CNC} No disponible en repositorios\n"
+        log_error "Paquete no encontrado en repos: $pkg"
+        {
+            echo "=== Intento de instalación: $pkg ==="
+            echo "ERROR: Paquete no encontrado en los repositorios de Kali Linux"
+            echo "Comando: apt-cache show $pkg"
+            apt-cache show "$pkg" 2>&1 || true
+            echo
+        } >> "$ERROR_LOG"
+        continue
+    fi
+
+    printf "          ${BLD}${CBL}→${CNC} Instalando...\n"
+
+    # Crear log temporal para esta instalación
+    temp_log=$(mktemp)
+
+    # Instalar con logs visibles
+    if sudo apt install -y "$pkg" 2>&1 | tee "$temp_log" | grep -E "(Unpacking|Setting up|Processing|Preparing|Selecting|already|newest)" | sed 's/^/          /'; then
         installed+=("$pkg")
+        printf "          ${BLD}${CGR}✓${CNC} Instalado correctamente\n"
+        log_info "Paquete instalado exitosamente: $pkg"
+        # Guardar log completo en caso de éxito
+        {
+            echo "=== Instalación exitosa: $pkg ==="
+            cat "$temp_log"
+            echo
+        } >> "$ERROR_LOG"
     else
         failed+=("$pkg")
+        printf "          ${BLD}${CRE}✗${CNC} Error en instalación\n"
         log_error "Fallo al instalar: $pkg"
+        # Guardar log completo del error
+        {
+            echo "=== ERROR en instalación: $pkg ==="
+            cat "$temp_log"
+            echo
+        } >> "$ERROR_LOG"
     fi
+
+    rm -f "$temp_log"
 done
 
 echo
