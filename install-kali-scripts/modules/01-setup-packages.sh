@@ -18,15 +18,6 @@ if [ "$(id -u)" = 0 ]; then
 fi
 msg_ok "Usuario correcto (no root)"
 
-# Verificar que se ejecuta desde HOME
-if [ "$PWD" != "$HOME" ]; then
-    msg_error "El script debe ejecutarse desde el directorio HOME"
-    msg_info "Directorio actual: $PWD"
-    msg_info "Directorio HOME: $HOME"
-    exit 1
-fi
-msg_ok "Directorio correcto (HOME)"
-
 # Verificar distribución
 if [ -f /etc/os-release ]; then
     . /etc/os-release
