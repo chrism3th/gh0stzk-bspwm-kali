@@ -19,15 +19,26 @@ https://github.com/user-attachments/assets/3eaae1e2-04dc-4a9b-8c91-139f85f5fb9e
 
 ## 👻 Welcome (Message from the fork maintainer)
 
-Welcome to this fork of the original dotfiles by **gh0stzk**. I’m chrisM (or YejiF), and I’ve created a port of these themes, originally designed for Arch Linux, adapting them for use in **Kali Linux**.
+Welcome to this fork of the original dotfiles by **gh0stzk**. I'm chrisM (or YejiF), and I've created a port of these themes, originally designed for Arch Linux, adapting them for use in **Kali Linux**.
 
 The main goal of this project is to preserve all the functionalities and features implemented by gh0stzk, such as the lightweight, efficient, and functional **bspwm** environment, while delivering an equally smooth experience on Kali Linux.
 
-I recommend reading the original README from gh0stzk before proceeding to install this fork. Currently, this fork is in a beta phase because the scripts to install the dependencies for these dotfiles sometimes fail. (At the moment, I have to comment out some functions in the script and execute them one by one to work.)
+### What's Different in This Fork?
+
+This fork includes several adaptations to make the dotfiles work seamlessly on Kali Linux:
+
+- **Package Manager Migration**: All `pacman`/`paru` commands have been replaced with `apt` equivalents
+- **Update System**: The Updates script now uses `apt list --upgradable` instead of Arch-specific `checkupdates`
+- **Clipboard Manager**: Replaced `clipcat` (AUR-only) with `copyq` (available in Kali repos)
+- **Modular Installer**: New installation system with 4 organized modules for easier troubleshooting
+- **Systemd Services**: Renamed from ArchUpdates to KaliUpdates for clarity
+
+I recommend reading the original README from gh0stzk before proceeding to install this fork. The new modular installation system is more reliable and allows you to install components step-by-step if needed.
 
 You can find the instructions for installing these dotfiles on Kali Linux in the [Installation](#-installation) section. Read it carefully before install it.
-To finish, if you want to collaborate with this fork, feel free to send pull requests with new features, bug fixes, or any improvements. You’re also welcome to report issues if needed. 
-I might not always be able to respond to pull requests or issues right away, but I’ll do my best to stay on top of things and keep this project maintained as regularly as I can. Thanks for your understanding and support!
+
+To finish, if you want to collaborate with this fork, feel free to send pull requests with new features, bug fixes, or any improvements. You're also welcome to report issues if needed.
+I might not always be able to respond to pull requests or issues right away, but I'll do my best to stay on top of things and keep this project maintained as regularly as I can. Thanks for your understanding and support!
 
 ## 👻 Welcome (Message from the owner and the goat gh0stzk)
 
@@ -382,31 +393,91 @@ And more.. You need to look sxhkdrc file for more, or press Alt + F1 for a cheat
 ### 💾 Installation:
 
 > [!NOTE]
-> The installer only works for **Kali** Linux, and based distros (but probably you have to install some dependencies manually, like i3lock).
+> The installer only works for **Kali** Linux and Debian-based distros. Some dependencies (like i3lock-color) may need to be installed manually on non-Kali systems.
 
-> [!WARNING]
-> The script to install dependencies is currently unstable but functional. If any part of the installation fails, it is recommended to install the dependencies manually by executing the functions in the script one by one. 
-> 
-> To do this, you can comment out specific functions like `install_fonts`, `install_custom_packages`, and `install_eww`, then execute each function individually to ensure proper installation.
+> [!IMPORTANT]
+> **New Modular Installation System**: The installation has been completely redesigned with a modular approach. You can now:
+> - Run a full automated installation
+> - Install specific modules independently
+> - Skip modules that fail and retry them later
+> - See detailed progress and error messages
 
+#### Quick Installation (Recommended)
 
-The way to install the dotfiles are downloading 2 scripts, one is to install the dependencies (``KaliInstallDeps.sh``) and the another one is to install the dotfiles (``KaliInstallDots.sh``)
-- **Open a terminal in HOME and download the installers**
+Clone the repository and run the main installer:
+
 ```sh
-curl https://raw.githubusercontent.com/ChrisMethsillo/gh0stzk-bspwm-kali/refs/heads/master/KaliInstallDeps.sh -o $HOME/KaliInstallDeps.sh
-curl https://raw.githubusercontent.com/ChrisMethsillo/gh0stzk-bspwm-kali/refs/heads/master/KaliInstallDots.sh -o $HOME/KaliInstallDots.sh
-```
-- **Now give it execute permissions**
-```sh
-chmod +x KaliInstallDeps.sh
-chmod +x KaliInstallDots.sh
-```
-- **Update the repository before execute the scripts**
-```sh
+# Clone the repository
+git clone --depth=1 https://github.com/ChrisMethsillo/gh0stzk-bspwm-kali.git
+cd gh0stzk-bspwm-kali
+
+# Update your system first
 sudo apt-get update
+
+# Run the installer
+cd install-kali-scripts
+chmod +x install.sh
+./install.sh
 ```
-- **Finally, you have to run the dependencies script before the dotfiles scripts**
+
+The installer will present you with an interactive menu where you can:
+1. **Full Installation** - Installs everything automatically
+2. **Module Selection** - Choose which components to install
+3. **System Information** - Check system compatibility
+4. **Help** - View detailed information
+
+#### Installation Modules
+
+The installation is divided into 4 modules:
+
+1. **Setup & Packages** (`01-setup-packages.sh`)
+   - System verification (RAM, disk space, internet)
+   - APT packages installation (~100 packages)
+   - Repository updates
+
+2. **Compile & Build** (`02-compile-build.sh`)
+   - Rust and Cargo installation
+   - eww compilation (Wayland widget system)
+   - xwinwrap compilation
+   - Additional tools (eza, yazi, tdrop, etc.)
+
+3. **Fonts & Themes** (`03-fonts-themes.sh`)
+   - Nerd Fonts installation
+   - GTK themes, icons, and cursors
+   - gh0stzk custom packages extraction
+
+4. **Dotfiles & Configuration** (`04-dotfiles-config.sh`)
+   - Dotfiles installation
+   - Backup creation
+   - Systemd services configuration
+   - First-time setup
+
+#### Manual Module Installation
+
+If you prefer to install modules individually:
+
 ```sh
-./KaliInstallDeps.sh
-./KaliInstallDots.sh
+cd install-kali-scripts
+
+# Install specific modules
+./modules/01-setup-packages.sh
+./modules/02-compile-build.sh
+./modules/03-fonts-themes.sh
+./modules/04-dotfiles-config.sh
 ```
+
+#### Troubleshooting
+
+- If a module fails, check the error message and fix the issue
+- You can re-run individual modules without affecting others
+- Module 2 (Compile & Build) takes the longest due to Rust/eww compilation
+- On virtual machines, change Picom backend from `glx` to `xrender` before rebooting
+
+#### Post-Installation
+
+After installation completes:
+1. **Reboot** your system
+2. Select **bspwm** from your login manager
+3. Log in with your credentials
+4. Press `Alt + @space` to open the theme selector
+5. Press `Alt + F1` to see all keybindings

@@ -39,7 +39,7 @@ case "$1" in
 		rofi-bluetooth
 		;;
 	--clipboard)
-		clipcat-menu
+		copyq menu
 		;;
 	--screenshot)
 		ScreenShoTer

@@ -76,7 +76,7 @@ run xsettingsd --config="${HOME}"/.config/bspwm/config/xsettingsd >/dev/null 2>&
 pidof -q eww || { eww -c "${HOME}"/.config/bspwm/eww daemon & }
 
 # Launch clipboard daemon
-run clipcatd
+copyq &
 
 # Launch polkit
 run lxpolkit

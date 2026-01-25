@@ -10,7 +10,9 @@ source "$(dirname "$(dirname "$0")")/common.sh"
 # ============================================
 section_banner "Clonación de Dotfiles"
 
-REPO_URL="https://github.com/gh0stzk/dotfiles"
+# IMPORTANTE: Este repositorio es una adaptación para Kali Linux
+# de los dotfiles originales de gh0stzk (https://github.com/gh0stzk/dotfiles)
+REPO_URL="https://github.com/chrism3th/gh0stzk-bspwm-kali.git"
 INSTALL_DIR="$HOME/.local/share/gh0stzk"
 
 msg_info "Repositorio: $REPO_URL"

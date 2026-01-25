@@ -76,7 +76,7 @@ case $MY_TERM in
 	case $1 in
 	    "--terminal") alacritty ;;
 	    "--floating") alacritty --class FloaTerm,FloaTerm ;;
-	    "--update") alacritty --hold --class FloaTerm,FloaTerm -e paru -Syu --nocombinedupgrade ;;
+	    "--update") alacritty --hold --class FloaTerm,FloaTerm -e sudo apt update && sudo apt upgrade -y ;;
 	    "--checkupdates") alacritty --hold --class Updating,Updating -e Updates --print-updates ;;
 	    "--yazi") alacritty --class FloaTerm,YaziTerm -e yazi ;;
 	    "--nvim") alacritty -e nvim ;;
@@ -88,7 +88,7 @@ case $MY_TERM in
 	case $1 in
 	    "--terminal") st ;;
 	    "--floating") st -c FloaTerm ;;
-	    "--update") st -c FloaTerm -e sh -c 'paru -Syu --nocombinedupgrade; read _ </dev/tty 2>/dev/null' ;;
+	    "--update") st -c FloaTerm -e sh -c 'sudo apt update && sudo apt upgrade -y; read _ </dev/tty 2>/dev/null' ;;
 	    "--checkupdates") st -c Updating -e sh -c 'Updates --print-updates; read _ </dev/tty 2>/dev/null' ;;
 	    "--yazi") st -n YaziTerm -c FloaTerm -e yazi ;;
 	    "--nvim") st -e nvim ;;
@@ -100,7 +100,7 @@ case $MY_TERM in
 	case $1 in
 	    "--terminal") kitty ;;
 	    "--floating") kitty --class=FloaTerm ;;
-	    "--update") kitty --hold --class=FloaTerm -e paru -Syu --nocombinedupgrade ;;
+	    "--update") kitty --hold --class=FloaTerm -e sudo apt update && sudo apt upgrade -y ;;
 	    "--checkupdates") kitty --hold --class=Updating -e Updates --print-updates ;;
 	    "--yazi") kitty --hold --name=YaziTerm --class=FloaTerm -e yazi ;;
 	    "--nvim") kitty -e nvim ;;
