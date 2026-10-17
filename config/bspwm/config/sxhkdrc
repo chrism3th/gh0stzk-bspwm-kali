@@ -241,10 +241,6 @@ super + alt + t
 super + alt + w
     WallSelect
 
-# Mount Android phones
-super + alt + a
-    OpenApps --android
-
 # Network Manager
 super + alt + n
     OpenApps --netmanager

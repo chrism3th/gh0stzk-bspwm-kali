@@ -33,7 +33,6 @@ packages=(
     "fonts-ubuntu"
     "jq"
     "webp-pixbuf-loader"
-    "simple-mtpfs"
     "i3lock-color"
     "libgtk-3-dev"
     "libpango1.0-dev"

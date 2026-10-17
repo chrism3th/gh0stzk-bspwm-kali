@@ -44,9 +44,6 @@ case "$1" in
 	--powermenu)
 		PowerMenu
 		;;
-	--android)
-		AndroidMount
-		;;
 	--keyboard)
 		KeyBoardL
 		;;
