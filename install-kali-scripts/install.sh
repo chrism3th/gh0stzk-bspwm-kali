@@ -41,7 +41,7 @@ ${BLD}${CYE}¿Qué se instalará?${CNC}
       • bspwm, polybar, rofi, dunst, picom, etc.
 
   ${BLD}${CGR}[${CYE}2${CGR}]${CNC} ${BLD}Compilación de Herramientas${CNC}
-      • Rust/Cargo + eza + yazi
+      • Rust/Cargo + yazi + xcolor
       • eww (ElKowar's Wacky Widgets)
       • xwinwrap (fondos animados)
       • Herramientas adicionales (tdrop, xqp, greenclip, etc.)
@@ -284,7 +284,7 @@ ${BLD}${CYE}01.${CNC} setup-packages     - Sistema y Paquetes APT
      • Instalación de ~100 paquetes desde APT
 
 ${BLD}${CYE}02.${CNC} compile-build      - Compilación de Herramientas
-     • Rust/Cargo + eza + yazi
+     • Rust/Cargo + yazi + xcolor
      • eww (widgets)
      • xwinwrap (fondos animados)
      • Herramientas adicionales

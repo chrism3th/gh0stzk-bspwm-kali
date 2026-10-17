@@ -12,7 +12,7 @@
 
 ;; Pacman
 (defpoll UPDATES :interval "15m" `cat $HOME/.cache/Updates.txt 2>/dev/null`)
-(defpoll packages :interval "1h" "pacman -Q | wc -l")
+(defpoll packages :interval "1h" "dpkg-query -f '.\\n' -W | wc -l")
 
 ;; Weather
 (defpoll weathericon :interval "15m" "Weather icon")

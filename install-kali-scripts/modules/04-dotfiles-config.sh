@@ -165,8 +165,9 @@ echo
 
 # Directorios de ~/.config/ a respaldar
 config_dirs=(
-    "bspwm" "alacritty" "clipcat" "picom" "rofi" "eww" "sxhkd" "dunst"
-    "kitty" "polybar" "geany" "gtk-3.0" "ncmpcpp" "yazi" "zsh" "mpd"
+    "bspwm" "alacritty" "cava" "clipcat" "ghostty" "picom" "rofi" "eww" "sxhkd" "dunst"
+    "jgmenu" "kitty" "polybar" "geany" "gtk-3.0" "ncmpcpp" "yazi" "zsh" "mpd" "mpv"
+    "st" "zathura"
 )
 
 # Archivos/directorios en $HOME a respaldar
@@ -231,7 +232,8 @@ fi
 
 # Respaldar configuración de Firefox si existe
 msg_info "Buscando perfil de Firefox..."
-firefox_profile=$(find "$HOME/.mozilla/firefox" -maxdepth 1 -name "*.default-release" -type d 2>/dev/null | head -n1)
+firefox_profile=$(find "$HOME/.mozilla/firefox" "$HOME/.config/mozilla/firefox" -maxdepth 1 -type d \
+    \( -name "*.default-release" -o -name "*.default-esr" \) 2>/dev/null | head -n1)
 
 if [ -n "$firefox_profile" ] && [ -d "$firefox_profile" ]; then
     msg_ok "Perfil de Firefox encontrado"
@@ -286,7 +288,8 @@ msg_ok "Directorios creados"
 # Copiar configuraciones a ~/.config
 msg_info "Copiando configuraciones a ~/.config/..."
 
-config_dirs=("alacritty" "bspwm" "clipcat" "geany" "gtk-3.0" "kitty" "mpd" "ncmpcpp" "yazi" "zsh")
+config_dirs=("alacritty" "bspwm" "cava" "clipcat" "dunst" "geany" "ghostty" "gtk-3.0" "jgmenu" "kitty"
+             "mpd" "mpv" "ncmpcpp" "systemd" "yazi" "zsh" "st" "zathura")
 
 copied_count=0
 failed_count=0
@@ -401,7 +404,8 @@ msg_ok "Archivos copiados a $HOME: ${#home_files[@]}"
 # Configurar Firefox
 msg_info "Configurando Firefox..."
 
-firefox_profile=$(find "$HOME/.mozilla/firefox" -maxdepth 1 -name "*.default-release" -type d 2>/dev/null | head -n1)
+firefox_profile=$(find "$HOME/.mozilla/firefox" "$HOME/.config/mozilla/firefox" -maxdepth 1 -type d \
+    \( -name "*.default-release" -o -name "*.default-esr" \) 2>/dev/null | head -n1)
 
 if [ -n "$firefox_profile" ] && [ -d "$firefox_profile" ]; then
     msg_ok "Perfil de Firefox encontrado"
@@ -425,11 +429,21 @@ else
     msg_info "Firefox no instalado o perfil no encontrado (no crítico)"
 fi
 
-# Actualizar configuración de startup-page si existe
+# Copiar y personalizar startup-page (nombre y zona horaria)
+if [ -d "$INSTALL_DIR/misc/startup-page" ]; then
+    cp -R "$INSTALL_DIR/misc/startup-page" "$HOME/.local/share/" 2>> "$ERROR_LOG"
+fi
+
 startup_config="$HOME/.local/share/startup-page/config.js"
 if [ -f "$startup_config" ]; then
-    sed -i "s/name: 'gh0stzk'/name: '$USER'/g" "$startup_config" 2>> "$ERROR_LOG"
-    msg_ok "Startup page personalizada con tu usuario"
+    timezone=$(timedatectl show --property=Timezone --value 2>/dev/null)
+    [ -z "$timezone" ] && timezone=$(readlink /etc/localtime 2>/dev/null | sed 's|.*/zoneinfo/||')
+
+    sed -i \
+        -e "0,/^[[:space:]]*name:/s|'.*'|'$USER'|" \
+        -e "/^[[:space:]]*timeZone:/s|'.*'|'$timezone'|" \
+        "$startup_config" 2>> "$ERROR_LOG"
+    msg_ok "Startup page personalizada con tu usuario y zona horaria"
 fi
 
 # Actualizar caché de fuentes
@@ -550,7 +564,7 @@ if [ "$is_vm" = false ]; then
 else
     msg_info "Ajustando configuración de Picom para VM..."
 
-    picom_config="$HOME/.config/bspwm/config/picom.conf"
+    picom_config="$HOME/.config/bspwm/config/picom/picom.conf"
 
     if [ -f "$picom_config" ]; then
         if sed -i 's/backend = "glx"/backend = "xrender"/' "$picom_config" 2>> "$ERROR_LOG"; then

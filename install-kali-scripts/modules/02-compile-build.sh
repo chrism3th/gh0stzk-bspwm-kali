@@ -95,23 +95,6 @@ if ensure_rust_and_cargo; then
     msg_ok "Rust/Cargo listos (si aplica)"
 fi
 
-# Instalar eza (reemplazo moderno de ls)
-if [ "$HAS_CARGO" = true ] && command_exists cargo; then
-    if command_exists eza; then
-        msg_ok "eza ya está instalado"
-    else
-        msg_info "Instalando eza..."
-        if run_logged cargo install eza; then
-            msg_ok "eza instalado correctamente"
-        else
-            msg_warning "Fallo al instalar eza (no crítico)"
-            log_error "Fallo al instalar eza desde cargo"
-        fi
-    fi
-else
-    msg_warning "Cargo no disponible; omitiendo instalación de eza"
-fi
-
 # Instalar yazi (file manager para terminal)
 if [ "$HAS_CARGO" = true ] && command_exists cargo; then
     if command_exists yazi; then
@@ -127,6 +110,23 @@ if [ "$HAS_CARGO" = true ] && command_exists cargo; then
     fi
 else
     msg_warning "Cargo no disponible; omitiendo instalación de yazi"
+fi
+
+# Instalar xcolor (color picker usado por Colorpicker)
+if [ "$HAS_CARGO" = true ] && command_exists cargo; then
+    if command_exists xcolor; then
+        msg_ok "xcolor ya está instalado"
+    else
+        msg_info "Instalando xcolor..."
+        if run_logged cargo install --locked xcolor; then
+            msg_ok "xcolor instalado correctamente"
+        else
+            msg_warning "Fallo al instalar xcolor (no crítico)"
+            log_error "Fallo al instalar xcolor desde cargo"
+        fi
+    fi
+else
+    msg_warning "Cargo no disponible; omitiendo instalación de xcolor"
 fi
 
 msg_ok "Instalación de Rust y herramientas completada"
@@ -268,135 +268,19 @@ fi
 echo
 
 # ============================================
-# COMPILACIÓN DE I3LOCK-COLOR
+# I3LOCK-COLOR
 # ============================================
-section_banner "Compilación de i3lock-color"
+# Kali empaqueta i3lock-color (se instala con apt en 01-setup-packages.sh).
+# Provee /usr/bin/i3lock, que es lo que llama ScreenLocker.
+section_banner "Verificación de i3lock-color"
 
-if command_exists i3lock-color; then
-    msg_ok "i3lock-color ya está instalado"
-
-    if ! ask_confirm "¿Deseas recompilar i3lock-color de todas formas?"; then
-        msg_info "Saltando compilación de i3lock-color"
-    else
-        COMPILE_I3LOCK=true
-    fi
+if dpkg -s i3lock-color >/dev/null 2>&1; then
+    msg_ok "i3lock-color instalado desde apt"
+elif run_logged sudo apt install -y i3lock-color; then
+    msg_ok "i3lock-color instalado desde apt"
 else
-    COMPILE_I3LOCK=true
-fi
-
-if [ "${COMPILE_I3LOCK:-false}" = true ]; then
-    msg_info "Instalando dependencias para i3lock-color..."
-
-    # Lista de dependencias necesarias
-    i3lock_deps=(
-        "autoconf" "gcc" "make" "pkg-config"
-        "libpam0g-dev" "libcairo2-dev" "libfontconfig1-dev"
-        "libxcb-composite0-dev" "libev-dev" "libx11-xcb-dev"
-        "libxcb-xkb-dev" "libxcb-xinerama0-dev" "libxcb-randr0-dev"
-        "libxcb-image0-dev" "libxcb-util-dev" "libxcb-xrm-dev"
-        "libxkbcommon-dev" "libxkbcommon-x11-dev" "libjpeg-dev"
-    )
-
-    deps_to_install=()
-    for dep in "${i3lock_deps[@]}"; do
-        if ! dpkg -l | grep -q "^ii  $dep"; then
-            deps_to_install+=("$dep")
-        fi
-    done
-
-    if [ ${#deps_to_install[@]} -gt 0 ]; then
-        msg_info "Instalando ${#deps_to_install[@]} dependencias..."
-        if run_logged sudo apt install -y "${deps_to_install[@]}"; then
-            msg_ok "Dependencias instaladas correctamente"
-        else
-            msg_error "Error al instalar dependencias de i3lock-color"
-            msg_warning "Algunas dependencias pueden faltar, continuando de todas formas..."
-            log_error "Fallo al instalar dependencias de i3lock-color"
-        fi
-    else
-        msg_ok "Todas las dependencias ya están instaladas"
-    fi
-
-    msg_info "Clonando repositorio de i3lock-color..."
-    I3LOCK_DIR="$TEMP_DIR/i3lock-color"
-
-    if run_logged git clone --depth=1 https://github.com/Raymo111/i3lock-color.git "$I3LOCK_DIR"; then
-        msg_ok "Repositorio clonado correctamente"
-
-        cd "$I3LOCK_DIR" || exit 1
-
-        msg_info "Compilando i3lock-color (puede tomar unos minutos)..."
-
-        # Usar el script de instalación provisto
-        if [ -f "install-i3lock-color.sh" ]; then
-            chmod +x install-i3lock-color.sh
-            if run_logged ./install-i3lock-color.sh; then
-                msg_ok "i3lock-color instalado correctamente mediante script oficial"
-            else
-                msg_warning "Script oficial falló, intentando método manual..."
-                log_error "install-i3lock-color.sh falló, probando método manual"
-
-                # Método manual
-                if run_logged ./build.sh; then
-                    msg_ok "Compilación exitosa"
-
-                    if [ -f "x86_64-pc-linux-gnu/release/i3lock" ]; then
-                        if run_logged sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color; then
-                            sudo chmod +x /usr/local/bin/i3lock-color
-                            msg_ok "i3lock-color instalado en /usr/local/bin/i3lock-color"
-                        else
-                            msg_error "Fallo al copiar binario de i3lock-color"
-                            log_error "Fallo al copiar i3lock-color a /usr/local/bin"
-                        fi
-                    else
-                        msg_error "El binario de i3lock-color no fue creado"
-                        log_error "Binario de i3lock-color no encontrado después de compilación"
-                    fi
-                else
-                    msg_error "Fallo durante la compilación de i3lock-color"
-                    msg_info "Revisa el log: $ERROR_LOG"
-                    log_error "Compilación de i3lock-color falló"
-                fi
-            fi
-        else
-            msg_warning "Script de instalación no encontrado, usando método manual..."
-
-            # Método manual clásico
-            if run_logged ./build.sh; then
-                msg_ok "Compilación exitosa"
-
-                if [ -f "x86_64-pc-linux-gnu/release/i3lock" ]; then
-                    if run_logged sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color; then
-                        sudo chmod +x /usr/local/bin/i3lock-color
-                        msg_ok "i3lock-color instalado en /usr/local/bin/i3lock-color"
-                    else
-                        msg_error "Fallo al copiar binario de i3lock-color"
-                        log_error "Fallo al copiar i3lock-color a /usr/local/bin"
-                    fi
-                else
-                    msg_error "El binario de i3lock-color no fue creado"
-                    log_error "Binario de i3lock-color no encontrado después de compilación"
-                fi
-            else
-                msg_error "Fallo durante la compilación de i3lock-color"
-                msg_info "Revisa el log: $ERROR_LOG"
-                log_error "Compilación de i3lock-color falló"
-            fi
-        fi
-
-        # Verificar instalación
-        if command_exists i3lock-color; then
-            msg_ok "i3lock-color instalado y verificado"
-        else
-            msg_warning "i3lock-color compilado pero no encontrado en PATH"
-            msg_info "Puede que necesites reiniciar o actualizar tu PATH"
-        fi
-
-        cd - > /dev/null
-    else
-        msg_error "Fallo al clonar repositorio de i3lock-color"
-        log_error "Git clone i3lock-color falló"
-    fi
+    msg_warning "No se pudo instalar i3lock-color (ScreenLocker no funcionará)"
+    log_error "apt install i3lock-color falló"
 fi
 
 echo

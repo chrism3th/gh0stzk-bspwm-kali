@@ -85,8 +85,8 @@ for pkg in "${packages[@]}"; do
                 fi
                 ;;
             "i3lock-color")
-                echo -e "    ${YELLOW}→ Requiere compilación desde: https://github.com/Raymo111/i3lock-color${NC}"
-                alternative_names+=("$pkg → compilar manualmente")
+                echo -e "    ${YELLOW}→ Está en kali-rolling; ejecuta sudo apt update${NC}"
+                alternative_names+=("$pkg → sudo apt update && sudo apt install i3lock-color")
                 ;;
             "xorg-dev")
                 alt="xserver-xorg-dev"
@@ -146,7 +146,7 @@ $(printf '%s\n' "${alternative_names[@]}")
 INSTRUCCIONES:
 1. Reemplazar los paquetes en 01-setup-packages.sh con las alternativas
 2. Paquetes que requieren compilación manual:
-   - i3lock-color: https://github.com/Raymo111/i3lock-color
+   - xcolor: cargo install --locked xcolor
 
 EOF
     echo -e "${BLUE}Reporte guardado en: package-fixes.txt${NC}"

@@ -125,7 +125,8 @@ echo
 
 problematic=(
     "gvfs-backends:MTP Support (reemplaza gvfs-mtp)"
-    "xfce4-clipman:Clipboard Manager (alt. copyq)"
+    "copyq:Clipboard Manager"
+    "i3lock-color:Screen locker (apt)"
     "webp:WebP Support"
     "libmtp-runtime:MTP Support"
     "libgdk-pixbuf2.0-dev:GTK Dev (corregido)"
@@ -154,11 +155,10 @@ echo -e "${CYAN}${BOLD}[4] Herramientas que Requieren Compilación${NC}"
 echo -e "═══════════════════════════════════════════════════════════"
 
 compile_tools=(
-    "i3lock-color:Screen locker con efectos"
     "eww:ElKowar's Wacky Widgets"
     "xwinwrap:Fondos de pantalla animados"
     "tdrop:Dropdown terminal"
-    "eza:Reemplazo moderno de ls"
+    "xcolor:Color picker"
     "yazi:File manager para terminal"
 )
 
