@@ -8,18 +8,17 @@
 # Features:
 #   ✔ Auto-updating menu (add/delete wallpapers without restart)
 #   ✔ Parallel image processing (optimized CPU usage)
-#   ✔ XXHash64 checksum verification for cache integrity
+#   ✔ mtime+size fast-path, XXHash64 verification only on real change
 #   ✔ Orphaned cache detection and cleanup
-#   ✔ Lockfile system for safe concurrent operations
+#   ✔ Single-instance lockfile (flock) for safe concurrent runs
 #   ✔ Rofi integration with theme support
-#   ✔ Lightweight (~2ms overhead on cache hits)
 #
 # Dependencies:
-#   → Core: bspwm, xrandr, xdpyinfo, rofi, xxhsum (xxhash)
+#   → Core: bspwm, rofi, xxhsum (xxhash)
 #   → Media: feh, imagemagick
 #   → GNU: findutils, coreutils
-
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+#
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # Licensed under GPL-3.0 license
 # =============================================================
 
@@ -33,18 +32,12 @@ cacheDir="$HOME/.cache/$USER/$current_rice"
 
 rofi_command="rofi -dmenu -theme $HOME/.config/bspwm/config/rofi-themes/WallSelect.rasi"
 
-# ImageMagick compatibility (Debian often ships IM6 without `magick`).
-get_image_cmd() {
-    if command -v magick >/dev/null 2>&1; then
-        echo "magick"
-        return 0
-    fi
-    echo "convert"
-}
-
-IM_CMD="$(get_image_cmd)"
+# Single-instance lock.
+exec 8>"${cacheDir}/.wallselect.lock"
+flock 8
 
 # Detect number of cores and set a sensible number of jobs
+# (override with WALLSELECT_JOBS=N if you want to tune it manually)
 get_optimal_jobs() {
     cores=$(nproc)
     if [ "$cores" -le 2 ]; then
@@ -56,52 +49,69 @@ get_optimal_jobs() {
     fi
 }
 
-PARALLEL_JOBS=$(get_optimal_jobs)
+PARALLEL_JOBS=${WALLSELECT_JOBS:-$(get_optimal_jobs)}
 
+# (POSIX sh can't export functions across exec, so we export the
+# definition as a string instead).
 process_func_def='process_image() {
     imagen="$1"
-    nombre_archivo=$(basename "$imagen")
+    nombre_archivo="${imagen##*/}"
     cache_file="${cacheDir}/${nombre_archivo}"
-    md5_file="${cacheDir}/.${nombre_archivo}.md5"
-    lock_file="${cacheDir}/.lock_${nombre_archivo}"
-    current_md5=$(xxh64sum "$imagen" | cut -d " " -f1)
-    (
-        flock -x 9
-        if [ ! -f "$cache_file" ] || [ ! -f "$md5_file" ] || [ "$current_md5" != "$(cat "$md5_file" 2>/dev/null)" ]; then
-            "$IM_CMD" "$imagen" -resize 500x500^ -gravity center -extent 500x500 "$cache_file"
-            echo "$current_md5" > "$md5_file"
-        fi
-        rm -f "$lock_file"
-    ) 9>"$lock_file"
+    meta_file="${cacheDir}/.${nombre_archivo}.meta"
+
+    stat_info=$(stat -c "%Y %s" "$imagen") || return 0
+    cur_mtime=${stat_info%% *}
+    cur_size=${stat_info#* }
+
+    saved_mtime=""
+    saved_size=""
+    saved_hash=""
+    if [ -f "$cache_file" ] && [ -f "$meta_file" ]; then
+        read -r saved_mtime saved_size saved_hash < "$meta_file"
+    fi
+
+    if [ "$cur_mtime" = "$saved_mtime" ] && [ "$cur_size" = "$saved_size" ]; then
+        return 0
+    fi
+
+    current_hash=$(xxh64sum "$imagen")
+    current_hash=${current_hash%% *}
+
+    if [ "$current_hash" = "$saved_hash" ] && [ -f "$cache_file" ]; then
+        printf "%s %s %s\n" "$cur_mtime" "$cur_size" "$current_hash" > "$meta_file"
+        return 0
+    fi
+
+    magick "$imagen" -strip -define jpeg:size=600x600 -thumbnail 300x300^ \
+        -gravity center -extent 300x300 "$cache_file" \
+        && printf "%s %s %s\n" "$cur_mtime" "$cur_size" "$current_hash" > "$meta_file"
 }'
 
-export process_func_def cacheDir wall_dir IM_CMD
+export process_func_def cacheDir
 
-# Clean old locks before starting
-rm -f "${cacheDir}"/.lock_* 2>/dev/null || true
+# Walk wall_dir ONCE and reuse the list both for processing and for
+# building the rofi menu, instead of running find twice.
+file_list=$(mktemp)
+trap 'rm -f "$file_list"' EXIT
 
-# Process files in parallel
-find "$wall_dir" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) -print0 | \
-    xargs -0 -P "$PARALLEL_JOBS" -I {} sh -c "$process_func_def; process_image \"{}\""
+find "$wall_dir" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) -print0 > "$file_list"
 
-# Clean orphaned cache files and their locks
+# Process files in parallel.
+xargs -0 -P "$PARALLEL_JOBS" -I {} sh -c "$process_func_def
+process_image \"\$1\"" _ {} < "$file_list"
+
+# Clean orphaned cache files
 for cached in "$cacheDir"/*; do
     [ -f "$cached" ] || continue
-    original="${wall_dir}/$(basename "$cached")"
+    nombre_archivo="${cached##*/}"
+    original="${wall_dir}/${nombre_archivo}"
     if [ ! -f "$original" ]; then
-        nombre_archivo=$(basename "$cached")
-        rm -f "$cached" \
-            "${cacheDir}/.${nombre_archivo}.md5" \
-            "${cacheDir}/.lock_${nombre_archivo}"
+        rm -f "$cached" "${cacheDir}/.${nombre_archivo}.meta"
     fi
 done
 
-# Clean any remaining lock files
-rm -f "${cacheDir}"/.lock_* 2>/dev/null || true
-
-# Launch rofi
-wall_selection=$(find "${wall_dir}" -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) -print0 |
-    xargs -0 basename -a |
+# Launch rofi (reusing the file list gathered above, no second find)
+wall_selection=$(xargs -0 basename -a < "$file_list" |
     LC_ALL=C sort |
     while IFS= read -r A; do
         printf '%s\000icon\037%s/%s\n' "$A" "$cacheDir" "$A"
@@ -109,9 +119,8 @@ wall_selection=$(find "${wall_dir}" -type f \( -iname "*.jpg" -o -iname "*.jpeg"
 
 # Set wallpaper
 [ -n "$wall_selection" ] && \
-    sed -i \
+    sed -i "$HOME/.config/bspwm/rices/$current_rice/theme-config.bash" \
         -e 's/^ENGINE=.*/ENGINE="Default"/' \
-        -e "s|^DEFAULT_WALL=.*|DEFAULT_WALL=\"$wall_dir/$wall_selection\"|" \
-        "$HOME/.config/bspwm/rices/$current_rice/theme-config.bash" && \
+        -e "s|^DEFAULT_WALL=.*|DEFAULT_WALL=\"$wall_dir/$wall_selection\"|" && \
     feh --bg-fill "${wall_dir}/${wall_selection}" && \
     WallSync &

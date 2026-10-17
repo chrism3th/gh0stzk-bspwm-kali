@@ -1,6 +1,7 @@
 // # z0mbi3 - https://github.com/gh0stzk/dotfiles
 
 configuration {
+    show-icons:                 false;
 	hover-select:				true;
 	me-select-entry:			"";
 	me-accept-entry:			"MousePrimary";
@@ -16,7 +17,7 @@ window {
     width:                       50%;
     x-offset:                    0px;
     y-offset:                    0px;
-    
+
     background-color:            @background;
     //border-radius: 				 6px;
 }
@@ -75,7 +76,7 @@ listview {
     reverse:                     false;
     fixed-height:                true;
     fixed-columns:               true;
-    
+
     spacing:                     15px;
     border-color:                @selected;
     background-color:            transparent;
@@ -86,9 +87,10 @@ listview {
 element {
     enabled:                     true;
     padding:                     40px 10px;
-    border:                      0px solid;
-    border-radius:               0px;
-    background-color:            @bg-alt;
+    border:                      1px solid;
+    border-radius:               6px;
+    border-color:                @selected;
+    background-color:            @background;
     text-color:                  @foreground;
     cursor:                      pointer;
 }

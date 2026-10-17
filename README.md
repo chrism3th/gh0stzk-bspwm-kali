@@ -60,19 +60,53 @@ You can switch themes instantly, with no need to restart your session or environ
 
 #### Consistency Across the Environment
 
-Each theme not only changes the appearance of bspwm but also instantly transforms the color scheme in terminals (Alacritty & Kitty), eww widgets, polybar bars, notifications, gtk theme, launchers and more. Visual harmony is guaranteed in every corner of your system.
+Unlike Matugen, Pywal, and other wallpaper-based theming tools, colors are not extracted from images. Every theme includes a handcrafted color palette, carefully selected to maintain consistency, readability, and visual appeal.
+
+A modular theming system propagates these colors across the entire desktop environment. Switching themes instantly updates:
+
+- BSPWM
+- GTK (3.x)
+- Dunst
+- Rofi
+- Terminals
+  - Alacritty
+  - Ghostty
+  - Kitty
+  - St
+  - Xfce-terminal
+- Neovim
+- Eww
+- Firefox
+- Jgmenu
+- Geany
+- ScreenLocker (i3lock-color)
+- Mpv Player
+- Cava
+- Zathura
+- Polybar
+- Cli-Tools
+  - Yazi
+  - Fzf-Tab
+  - Bat
+  - Eza
+  - Ncmpcpp
+
+Not all modules are enabled.
+
+If you want to know how it works and how to enable or disable modules, go to [Color Modules](https://github.com/gh0stzk/dotfiles/wiki/Color-Modules)
+
+ToDo-List:
+
+- Obsidian
+- Telegram-desktop
+- Steam
+- Btop
+- Qt (5/6)
+- Rmpc
 
 #### Performance optimized
 
-BSPWM is not a desktop environment (DE), and that’s exactly what makes it stand out in terms of lightweight performance. On my systems, my BSPWM-dotfiles environment starts with under **500 MB of RAM usage**. While these numbers don't tell the whole story, they do highlight the minimalist approach that a window manager should embrace.
-
-It’s true that Wayland-based environments like Hyprland and Sway are modern and popular, but they come at a cost — for instance, Hyprland typically starts with nearly 1 GB of memory usage, which contradicts the idea of being truly lightweight.
-
-Thanks to the latest major update to Picom, we now have stable and lightweight animations on X11. Additionally, I’ve optimized my setup to avoid unnecessary service reloads. Unlike distributions such as Archcraft or other dotfiles in the web —which restart bspwm, sxhkd, picom, dunst, and others whenever the theme changes— my environment keeps these services running without interruption.
-
-It’s designed so that services/daemons which only need to be launched once do so correctly, and aren’t restarted every time a theme is switched. Changing the theme doesn’t require restarting bspwm, since it’s entirely possible to update its appearance using bspc without reloading the window manager.
-
-In short, my setup is faster, smoother, and more stable than what’s provided by preconfigured distributions.
+BSPWM is not a desktop environment (DE), and that’s exactly what makes it stand out in terms of lightweight performance. On my systems, my BSPWM-dotfiles environment starts with under **600 MB of RAM usage**. While these numbers don't tell the whole story, they do highlight the minimalist approach that a window manager should embrace.
 
 In addition, each theme can be configured independently — either by manually editing the theme’s configuration file or using my RiceEditor application. This ensures a high level of customization: if you want a minimalist setup for a specific theme, you can disable animations, shadows, rounded borders, or fading effects. On the other hand, if you prefer a more visually rich theme with all those features enabled, that’s fully supported as well. My dotfiles are built to provide that level of flexibility.
 
@@ -88,29 +122,17 @@ You can check the Wiki [👉 Monitors Setup](https://github.com/gh0stzk/dotfiles
 
 Is an application designed to simplify the customization of your current theme. It allows you to easily adjust various visual and configuration aspects, tailoring your environment to your preferences without the need to manually edit configuration files.
 
-#### Eww Widgets
-
-4 different widgets, including a calendar, music player, profile card and a cheatsheet. These widgets are not only functional but also instantly adapt to the color scheme of the selected theme.
-
-#### Jgmenu
-
-Explore an elegant right-click menu (Desktop) made with Jgmenu, which also syncs with themes for flawless visual consistency.
-
-#### LockScreen
-
-The lockscreen automatically adapts to the active theme and offers two locking options: it can capture the current screen with a blur effect, or use a specific wallpaper depending on the current theme.
-
 #### Wallpaper Engines
 
 My dotfiles support **5 different methods** for setting your favorite wallpaper:
 
-1. **Theme**: Sets a random wallpaper from the theme’s Walls directory. (Default)
+1. **Random**: Sets a random wallpaper from the theme’s Walls directory.
 2. **CustomDir**: Sets a random wallpaper from a directory you specify.
-3. **CustomImage**: Sets a specific image as wallpaper.
+3. **Default**: Sets a specific image as wallpaper. (Default)
 4. **CustomAnimated**: Supports animated wallpapers (.mp4, .mkv, .gif).
 5. **Slideshow**: Changes the wallpaper every 15 minutes with a random image from the theme’s Walls directory.
 
-Each option is **theme-specific**, meaning you can have an animated wallpaper in one theme, a static image in another, or a custom directory in a third — And all your settings will be preserved per theme. By default, all themes load a random wallpaper from their Walls folder.
+Each option is **theme-specific**, meaning you can have an animated wallpaper in one theme, a static image in another, or a custom directory in a third — And all your settings will be preserved per theme. By default, all themes load a default wallpaper from their Walls Rice folder.
 
 Check the wiki for more details: [👉 Wallpapers Configuration](https://github.com/gh0stzk/dotfiles/wiki/Wallpapers-Configuration)
 
@@ -119,10 +141,6 @@ Check the wiki for more details: [👉 Wallpapers Configuration](https://github.
 A _scratchpad_ is a tool designed to provide quick, temporary access to applications or notes without disrupting the desktop workflow. When activated, the scratchpad appears over the current workspace, allowing the user to access applications like a terminal, text editor, or any configured tool. Minimizing it hides the scratchpad from view but keeps it running in the background, ready to be reopened with a simple keyboard shortcut.
 
 It's ideal for quick note-taking, running commands, or accessing auxiliary tools without losing focus on the current task.
-
-#### Visual Composition and Animations
-
-Each theme features a unique color palette, along with transparencies, shadows, and animations—all designed to maintain visual balance without impacting performance or overwhelming the environment.
 
 #### Rofi Applets
 
@@ -136,7 +154,7 @@ Rofi applets to simplify your workflow:
 - Android MTP Manager
 - Power Menu
 - Keyboard Layout
-- Terminal Selector (Alacritty or Kitty)
+- Terminal Selector (Alacritty, Kitty, ST and ghostty)
 - Rofi app launcher style selector
 - Tab app switcher
 - Pass Manager (Using pass app)
@@ -180,6 +198,10 @@ Optimized, native ZSH configuration. Not __Oh-My-Zsh__ or other bloated plugin m
 | :traffic_light: Wallpaper Selector |
 |:-:|
 |![Shot-2024-11-08-134530](https://github.com/user-attachments/assets/dbac8c47-f12c-4242-97d6-38ad1193f76b)|
+
+| :tshirt: Bar Selector |
+|:-:|
+|![Bspwm Bar Selector](https://github.com/user-attachments/assets/94c4d699-890c-47d4-85dc-8e9622f4c679)|
 
 ### 🎨 The themes
 
@@ -303,10 +325,6 @@ Optimized, native ZSH configuration. Not __Oh-My-Zsh__ or other bloated plugin m
 | :---: | :---: |
 | Profile Panel | Music Player |
 
-| ![Shot-2024-11-10-000520](https://github.com/user-attachments/assets/a0871d4e-5b2b-4e64-ae79-617feec71cf1) |
-| :--------------------------------------------------------------------------------------------------------: |
-|                                                Cheat Sheet                                                 |
-
 ---
 
 ### Rice Editor
@@ -341,11 +359,17 @@ https://github.com/user-attachments/assets/79764678-c519-4a41-a333-2a862a6d10f8
 | :--------------------------------------------------------------------------------------------------: |
 |            The environment changes with each theme. In the gif: (Ranger, Thunar, Ncmpcpp)            |
 
+### Firefox theme
+
+| Firefox theme - z0mbi3 Fox |
+|:-:|
+| <img src="https://github.com/user-attachments/assets/877774da-1d27-4e9e-bd79-b084cf0c293e" alt="Firefox theme - z0mbi3-Fox" align="center"> |
+
 ### Neovim setup
 
 | Neovim setup |
 |:-:|
-| ![Neovim setup](https://github.com/user-attachments/assets/a70a0ebb-9921-4d2d-88f3-5eabdc5d10f9) |
+| ![Neovim setup](https://github.com/user-attachments/assets/deff5074-3d9b-4f00-8edd-82c83b6dccf4) |
 | Plugins included [Neovim setup wiki](https://github.com/gh0stzk/dotfiles/wiki/Neovim-setup) |
 
 ## Very useful keybindigs to know...
@@ -356,6 +380,7 @@ https://github.com/user-attachments/assets/79764678-c519-4a41-a333-2a862a6d10f8
 | `super` + `Enter`<br>`super` + `alt` + `Enter` | Open a terminal<br>Open a floating terminal. |
 | `alt` + `@space` | Display menu to select a theme. |
 | `super` + `@space` | Apps Menu. |
+| `super` + `alt` + `@space` | Bar Selector. |
 | `super` + `alt` + `w`| Opens a menu to select a wallpaper. |
 | `super` + `alt` + `h`<br>`super` + `alt` + `u` | Hides bar/s<br>unhide bar/s |
 | `super` + `alt` + `s` | Takes screenshot. |

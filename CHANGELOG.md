@@ -1,3 +1,50 @@
+## Feat: New BarSelector (Select any of the 18 bars in any theme)
+##### 13 October 2026
+
+**New**
+- Now you can select any bar from the 18 themes for the theme of your choice. Thanks to https://github.com/ilshatvm for the rofi design
+- New cheatsheet with rofi (Alt + F1). Taken from https://codeberg.org/justaguylinux/bspwm-setup
+
+**Removed**
+- Eww cheatsheet
+
+**Changed**
+- Some shortcuts were modified
+
+**Fixed**
+- The glyphs in some Rofi applets and remaining configurations, display a white rectangle.
+
+<img width="784" height="351" alt="BarSelector" src="https://github.com/user-attachments/assets/d7469cdf-0d5d-4615-8821-21971196ddae" />
+<img width="720" height="731" alt="2026-10-13_06-52" src="https://github.com/user-attachments/assets/e856c3ba-736c-407b-a449-1b673d896865" />
+
+----
+
+## Updates & other optimizations
+##### 24 May 2026
+
+**Fixed**
+- RiceEditor App fix bad syntax & crash when apply an animated wallpaper.
+
+**Modified**
+- The dunst configuration file was returned to its default directory in ~/.config and split into two files to make it easier to theme. The dunst module was also updated.
+- Picom configuration, rules, and animations refactored and optimized, smooth and lightweight. Some animations like dunst notifications are alway enabled.
+- Jgmenu has been redesigned and now looks better. Its module has also been changed.
+- All Geany colorschemes have been removed; they are now generated dynamically.
+- Kitty module refactored, all themes removed, now generated dynamically.
+- I modified the loading order of some modules to make the transition between Rices smoother.
+- SoftReload script optimized
+- Wallpaper module script optimized & fix when the engine is SlideShow, only first wall was catched for rofi image.
+
+**New**
+- I added 5 more modules for cava, ghostty, xfce terminal, zathura and mpv applications.
+- My dots now support ghostty terminal, now you can select from 4 terminals, (alacritty, st, kitty & ghostty)
+- New Polybar module "ColorPicker".
+- I've reintroduced my "z0mbieFox" theme for Firefox, and best of all, it syncs with the colors of the theme you're using. It comes with a startpage and BetterFox.
+
+In case you haven't noticed, the modules mentioned are located in ~/.config/bspwm/config/modules and function somewhat like Matugen or PyWal in my environment. I plan to gradually add more modules to support many applications.
+
+- MPV configuration includes a modern graphical interface and a thumbnail in the search bar. Of course, the menu colors change with Rice.
+
 ## feat - Minimizing like... windows in bspwm
 ##### 12 Nov 2025
 

@@ -1,12 +1,14 @@
 #############################
 #		Isabel Theme		#
 #############################
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # https://github.com/gh0stzk/dotfiles
 
 # (Onedark) colorscheme
 bg="#14171c"
+bg_alt="#0014171c"
 fg="#abb2bf"
+trans="#0014171c"
 
 black="#181b21"
 red="#be5046"
@@ -25,17 +27,30 @@ magentab="#8677cf"
 cyanb="#56b6c2"
 whiteb="#b8bfe5"
 
+# Extend
+purple="#c678dd"
+amber="#dcae66"
+pink="#d17a9a"
+orange="#c1774a"
+indigo="#5f6fbd"
+lime="#9fca56"
+grey="#6b7280"
+bluegray="#5a6b87"
+
 accent_color="$black"
 arch_icon="#0f94d2"
+
+# Bar
+main_bar="bar09"
 
 # Bspwm options
 BORDER_WIDTH="0"		# Bspwm border
 TOP_PADDING="1"
-BOTTOM_PADDING="40"
+BOTTOM_PADDING="1"
 LEFT_PADDING="1"
 RIGHT_PADDING="1"
-NORMAL_BC="#b8bfe5"		# Normal border color
-FOCUSED_BC="#7560d3"	# Focused border color
+NORMAL_BC="$whiteb"     # Normal border color
+FOCUSED_BC="$magenta"   # Focused border color
 
 # Terminal font & size
 term_font_size="10"

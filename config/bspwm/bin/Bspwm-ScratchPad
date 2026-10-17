@@ -18,7 +18,7 @@
 #   - xdo (window operations)
 #   - xprop (window identification)
 #
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # Licensed under GPL-3.0 license
 # =============================================================
 
@@ -78,8 +78,14 @@ if [ -n "$WINDOW_ID" ]; then
         bspc node "$WINDOW_ID" -g hidden=off -f
     fi
 else
+	# Selector depende del terminal: ghostty solo controla el campo instance
+    if [ "$MY_TERM" = "ghostty" ]; then
+        RULE_SELECTOR="*:$SCRATCHPAD_NAME"
+    else
+        RULE_SELECTOR="$SCRATCHPAD_NAME"
+    fi
     # Create rule for new node
-    bspc rule -a "$SCRATCHPAD_NAME" \
+    bspc rule -a "$RULE_SELECTOR" \
         state=floating \
         sticky=on \
         layer=above \
@@ -88,9 +94,10 @@ else
 
 	# Launch the corresponding terminal
 	case $MY_TERM in
-        "alacritty") alacritty --class "$SCRATCHPAD_NAME" & ;;
-        "st") st -c "$SCRATCHPAD_NAME" & ;;
-        "kitty")     kitty --class="$SCRATCHPAD_NAME" & ;;
+        "alacritty") alacritty -o window.opacity=0.93 --class "$SCRATCHPAD_NAME" & ;;
+        "st") st -A 0.93 -c "$SCRATCHPAD_NAME" & ;;
+        "kitty") kitty -o background_opacity=0.93 --class="$SCRATCHPAD_NAME" & ;;
+        "ghostty") ghostty --background-opacity=0.93 --x11-instance-name="$SCRATCHPAD_NAME" & ;;
     esac
 
     # Wait and adjust final position

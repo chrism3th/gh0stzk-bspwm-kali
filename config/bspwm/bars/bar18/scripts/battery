@@ -1,0 +1,38 @@
+#!/bin/sh
+
+bat=/sys/class/power_supply/BAT0
+
+battery_status() {
+    [ -d "$bat" ] && printf 'true' || printf 'false'
+}
+
+icon() {
+    [ -d "$bat" ] || { printf 'images/battery_empty.png'; return; }
+
+    if [ "$(cat "$bat/status" 2>/dev/null)" = "Charging" ]; then
+        printf 'images/battery_charging.png'
+        return
+    fi
+
+    per=$(cat "$bat/capacity" 2>/dev/null)
+    per=${per:-0}
+
+    if   [ "$per" -gt 90 ]; then printf 'images/battery_100.png'
+    elif [ "$per" -gt 80 ]; then printf 'images/battery_90.png'
+    elif [ "$per" -gt 70 ]; then printf 'images/battery_70.png'
+    elif [ "$per" -gt 50 ]; then printf 'images/battery_50.png'
+    elif [ "$per" -gt 30 ]; then printf 'images/battery_30.png'
+    elif [ "$per" -gt 10 ]; then printf 'images/battery_20.png'
+    else printf 'images/battery_empty.png'
+    fi
+}
+
+percent() {
+    cat "$bat/capacity" 2>/dev/null || printf '0'
+}
+
+case "$1" in
+    battery_status) battery_status ;;
+    icon) icon ;;
+    percent) percent ;;
+esac

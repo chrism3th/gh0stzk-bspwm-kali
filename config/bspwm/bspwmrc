@@ -9,7 +9,7 @@
 # Author:  gh0stzk
 # Repo:    https://github.com/gh0stzk/dotfiles
 # Date:    24.04.2025 20:37:31
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # =============================================================
 
 # Set environment variables
@@ -22,6 +22,9 @@ export _JAVA_AWT_WM_NONREPARENTING=1
 #  ║║║║ ║╠╦╝╠╩╗╚═╗╠═╝╠═╣║  ║╣ ╚═╗
 #  ╚╩╝╚═╝╩╚═╩ ╩╚═╝╩  ╩ ╩╚═╝╚═╝╚═╝
 
+bspc config remove_disabled_monitors true
+bspc config remove_unplugged_monitors true
+bspc config merge_overlapping_monitors true
 MonitorSetup
 
 #  ╔╗ ╔═╗╔═╗╦ ╦╔╦╗  ╔═╗╔═╗╔╗╔╔═╗╦╔═╗
@@ -67,7 +70,7 @@ run sxhkd -c "${HOME}"/.config/bspwm/config/sxhkdrc
 "${HOME}"/.config/bspwm/bin/Theme.sh
 
 # Launch picom
-run picom --config "${HOME}"/.config/bspwm/config/picom.conf
+run picom --config "${HOME}"/.config/bspwm/config/picom/picom.conf
 
 # Launch xsettingsd
 run xsettingsd --config="${HOME}"/.config/bspwm/config/xsettingsd >/dev/null 2>&1
@@ -82,4 +85,4 @@ copyq &
 run lxpolkit
 
 # Start one time message
-[ ! -f "$HOME/.config/bspwm/config/.first_run_done" ] && alacritty --hold -e sh -c 'cat "$HOME/.config/bspwm/config/FirstMessage.txt"; sleep 0.1' && touch "$HOME/.config/bspwm/config/.first_run_done"
+[ ! -f "$HOME/.config/bspwm/config/.first_run_done" ] && eww -c ${HOME}/.config/bspwm/eww open --toggle welcome && touch "$HOME/.config/bspwm/config/.first_run_done"

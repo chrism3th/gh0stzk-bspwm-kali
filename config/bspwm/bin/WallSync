@@ -4,7 +4,7 @@
 # Repo:    https://github.com/gh0stzk/dotfiles
 # Date:    07.11.2025
 # WallSync: Update and regenerate the wallpaper image currently in use
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # Licensed under GPL-3.0 license
 # =============================================================
 
@@ -12,25 +12,12 @@ RICE=$(cat "$HOME/.config/bspwm/.rice")
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}"
 HASH_FILE="$CACHE_DIR/current_wall.hash"
 
-# ImageMagick compatibility (Debian often ships IM6 without `magick`).
-get_image_cmd() {
-    if command -v magick >/dev/null 2>&1; then
-        echo "magick"
-        return 0
-    fi
-    echo "convert"
-}
-
-IM_CMD="$(get_image_cmd)"
-
-# Common magick parameters
-MAGICK_PARAMS="-strip -resize 30% -gravity center -crop 760x196+0+0 +repage -quality 65 -define webp:method=3 -define webp:thread-level=1"
-
 mkdir -p "$CACHE_DIR"
 
 generate_header() {
     INPUT="$1"
-    "$IM_CMD" "$INPUT" $MAGICK_PARAMS "$CACHE_DIR/rofi_header.webp"
+    set -- -strip -resize 30% -gravity center -crop 760x196+0+0 +repage -quality 65 -define webp:method=3 -define webp:thread-level=1
+    magick "$INPUT" "$@" "$CACHE_DIR/rofi_header.webp"
 }
 
 check_and_update() {
