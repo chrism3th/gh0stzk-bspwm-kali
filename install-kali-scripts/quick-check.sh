@@ -178,9 +178,7 @@ if [ "$all_critical_ok" = true ] && [ "$available_space" -ge 5 ]; then
     echo -e "${GREEN}✓ El sistema está listo para la instalación${NC}"
     echo
     echo -e "${BOLD}Próximos pasos:${NC}"
-    echo "  1. Ejecutar: ${CYAN}cd install-kali-scripts${NC}"
-    echo "  2. Ejecutar: ${CYAN}chmod +x install.sh${NC}"
-    echo "  3. Ejecutar: ${CYAN}./install.sh${NC}"
+    echo "  1. Desde la raíz del repo ejecutar: ${CYAN}./KaliInstaller${NC}"
 else
     echo -e "${YELLOW}⚠ Se recomienda resolver los problemas antes de continuar${NC}"
     echo

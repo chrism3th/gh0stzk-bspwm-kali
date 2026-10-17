@@ -19,10 +19,12 @@ CNC=$(tput sgr0)       # Reset colors
 # ==============================
 # VARIABLES GLOBALES
 # ==============================
-INSTALL_DIR="$HOME/.local/share/gh0stzk"
-BACKUP_DIR="$HOME/.RiceBackup/$(date +%Y%m%d-%H%M%S)"
-ERROR_LOG="$HOME/RiceError-$(date +%Y%m%d-%H%M%S).log"
-TEMP_DIR="/tmp/gh0stzk-install"
+# Se respetan los valores heredados: install.sh los exporta y cada módulo
+# vuelve a cargar este archivo, así toda la instalación usa un único log.
+INSTALL_DIR="${INSTALL_DIR:-$HOME/.local/share/gh0stzk}"
+BACKUP_DIR="${BACKUP_DIR:-$HOME/.RiceBackup/$(date +%Y%m%d-%H%M%S)}"
+ERROR_LOG="${ERROR_LOG:-$HOME/RiceError-$(date +%Y%m%d-%H%M%S).log}"
+TEMP_DIR="${TEMP_DIR:-/tmp/gh0stzk-install}"
 
 # ==============================
 # FUNCIONES DE UTILIDAD

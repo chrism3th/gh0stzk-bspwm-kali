@@ -52,7 +52,7 @@ ${BLD}${CYE}¿Qué se instalará?${CNC}
       • Temas GTK, iconos, cursores
 
   ${BLD}${CGR}[${CYE}4${CGR}]${CNC} ${BLD}Dotfiles y Configuración${CNC}
-      • Clonación de dotfiles oficiales
+      • Copia de los dotfiles de este repositorio (rama actual)
       • Respaldo de configuraciones existentes
       • Instalación de dotfiles
       • Configuración de servicios (MPD, shell, etc.)

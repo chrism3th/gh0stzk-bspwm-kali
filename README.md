@@ -28,10 +28,12 @@ The main goal of this project is to preserve all the functionalities and feature
 This fork includes several adaptations to make the dotfiles work seamlessly on Kali Linux:
 
 - **Package Manager Migration**: All `pacman`/`paru` commands have been replaced with `apt` equivalents
-- **Update System**: The Updates script now uses `apt list --upgradable` instead of Arch-specific `checkupdates`
+- **Update System**: The Updates script syncs apt package lists into a private cache (no `sudo`), like `checkupdates` does on Arch
 - **Clipboard Manager**: Replaced `clipcat` (AUR-only) with `copyq` (available in Kali repos)
-- **Modular Installer**: New installation system with 4 organized modules for easier troubleshooting
-- **Systemd Services**: Renamed from ArchUpdates to KaliUpdates for clarity
+- **Modular Installer**: Single entry point (`./KaliInstaller`) backed by 4 modules for easier troubleshooting
+- **Systemd Services**: Renamed from ArchUpdates to KaliUpdates, enabled automatically by the installer
+- **Native builds**: `st` is compiled from gh0stzk's source and `i3lock-color` comes from the Kali repos
+- **Not included**: Ghostty and the Android MTP mounter (`simple-mtpfs`) are not packaged for Kali and were removed
 
 I recommend reading the original README from gh0stzk before proceeding to install this fork. The new modular installation system is more reliable and allows you to install components step-by-step if needed.
 
@@ -70,7 +72,6 @@ A modular theming system propagates these colors across the entire desktop envir
 - Rofi
 - Terminals
   - Alacritty
-  - Ghostty
   - Kitty
   - St
   - Xfce-terminal
@@ -151,10 +152,9 @@ Rofi applets to simplify your workflow:
 - Bluetooth Controller
 - Clipboard Manager
 - Screenshot Tool
-- Android MTP Manager
 - Power Menu
 - Keyboard Layout
-- Terminal Selector (Alacritty, Kitty, ST and ghostty)
+- Terminal Selector (Alacritty, Kitty and ST)
 - Rofi app launcher style selector
 - Tab app switcher
 - Pass Manager (Using pass app)
@@ -286,9 +286,9 @@ Optimized, native ZSH configuration. Not __Oh-My-Zsh__ or other bloated plugin m
 | :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
 |                                                 Power Menu                                                 |                                                Screenshoter                                                |
 
-| ![Shot-2024-11-09-132031](https://github.com/user-attachments/assets/0893b0b6-1211-43cb-9923-f4e42af70f4b) | ![Shot-2024-11-09-133244](https://github.com/user-attachments/assets/03546cb9-cf0d-42a2-b424-458c887e67c2) |
-| :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
-|                                              Keyboard Layout                                               |                                               Android Mount                                                |
+| ![Shot-2024-11-09-132031](https://github.com/user-attachments/assets/0893b0b6-1211-43cb-9923-f4e42af70f4b) |
+| :---: |
+| Keyboard Layout |
 
 | ![Shot-2024-11-09-150142](https://github.com/user-attachments/assets/f7d1c404-c2e8-43c0-ad5e-6b052e3918c3) | ![Shot-2024-11-09-155335](https://github.com/user-attachments/assets/889d2ccf-beff-402d-8804-6d82c5638860) |
 | :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
@@ -418,7 +418,7 @@ And more.. You need to look sxhkdrc file for more, or press Alt + F1 for a cheat
 ### 💾 Installation:
 
 > [!NOTE]
-> The installer only works for **Kali** Linux and Debian-based distros. Some dependencies (like i3lock-color) may need to be installed manually on non-Kali systems.
+> The installer only works for **Kali** Linux and Debian-based distros. On non-Kali systems some packages (like `i3lock-color`) may not be in the repos.
 
 > [!IMPORTANT]
 > **New Modular Installation System**: The installation has been completely redesigned with a modular approach. You can now:
@@ -429,74 +429,60 @@ And more.. You need to look sxhkdrc file for more, or press Alt + F1 for a cheat
 
 #### Quick Installation (Recommended)
 
-Clone the repository and run the main installer:
+Clone the repository and run the installer:
 
 ```sh
-# Clone the repository
-git clone --depth=1 https://github.com/ChrisMethsillo/gh0stzk-bspwm-kali.git
+git clone --depth=1 https://github.com/chrism3th/gh0stzk-bspwm-kali.git
 cd gh0stzk-bspwm-kali
-
-# Update your system first
-sudo apt-get update
-
-# Run the installer
-cd install-kali-scripts
-chmod +x install.sh
-./install.sh
+./KaliInstaller
 ```
 
-The installer will present you with an interactive menu where you can:
-1. **Full Installation** - Installs everything automatically
-2. **Module Selection** - Choose which components to install
-3. **System Information** - Check system compatibility
-4. **Help** - View detailed information
+The installer installs the dotfiles from the clone you run it from (current branch and commit), so you can test a branch before merging it.
+
+Options:
+
+| Command | Description |
+| --- | --- |
+| `./KaliInstaller` | Interactive menu (full install, pick a module, system info) |
+| `./KaliInstaller --full` | Full installation without the menu |
+| `./KaliInstaller --info` | Show system information and installed tools |
+| `./KaliInstaller --help` | Show help |
 
 #### Installation Modules
 
-The installation is divided into 4 modules:
+The installation is divided into 4 modules, run in this order:
 
 1. **Setup & Packages** (`01-setup-packages.sh`)
-   - System verification (RAM, disk space, internet)
-   - APT packages installation (~100 packages)
-   - Repository updates
+   - System verification (disk space, internet, not running as root)
+   - APT packages (bspwm, polybar, picom, rofi, dunst, i3lock-color, copyq, etc.)
 
 2. **Compile & Build** (`02-compile-build.sh`)
-   - Rust and Cargo installation
-   - eww compilation (Wayland widget system)
-   - xwinwrap compilation
-   - Additional tools (yazi, xcolor, Zsh plugins)
+   - Rust/Cargo, yazi and xcolor (symlinked into `/usr/local/bin`)
+   - eww (X11 build)
+   - xwinwrap (animated wallpapers)
+   - st (gh0stzk's fork, built from source)
+   - Zsh plugins (fzf-tab, history-substring-search)
 
 3. **Fonts & Themes** (`03-fonts-themes.sh`)
-   - Nerd Fonts installation
-   - GTK themes, icons, and cursors
-   - gh0stzk custom packages extraction
+   - Nerd Fonts
+   - gh0stzk GTK themes, icons and cursors
 
 4. **Dotfiles & Configuration** (`04-dotfiles-config.sh`)
-   - Dotfiles installation
-   - Backup creation
-   - Systemd services configuration
-   - First-time setup
+   - Backup of your current configs to `~/.RiceBackup/`
+   - Dotfiles installation (optional Neovim config; Firefox theme if a profile exists)
+   - Services: MPD (user), KaliUpdates timer, Zsh as default shell
+   - Virtual machine tweaks for Picom
 
-#### Manual Module Installation
-
-If you prefer to install modules individually:
-
-```sh
-cd install-kali-scripts
-
-# Install specific modules
-./modules/01-setup-packages.sh
-./modules/02-compile-build.sh
-./modules/03-fonts-themes.sh
-./modules/04-dotfiles-config.sh
-```
+Every module can also be run on its own, e.g. `./install-kali-scripts/modules/02-compile-build.sh`.
+A single log of the whole run is written to `~/RiceError-<date>.log`.
 
 #### Troubleshooting
 
 - If a module fails, check the error message and fix the issue
 - You can re-run individual modules without affecting others
 - Module 2 (Compile & Build) takes the longest due to Rust/eww compilation
-- On virtual machines, change Picom backend from `glx` to `xrender` before rebooting
+- On virtual machines the installer switches Picom to the `xrender` backend automatically
+- Check `~/RiceError-<date>.log` for the full output of every step
 
 #### Post-Installation
 

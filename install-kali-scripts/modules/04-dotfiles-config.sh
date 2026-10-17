@@ -15,6 +15,16 @@ section_banner "Clonación de Dotfiles"
 REPO_URL="https://github.com/chrism3th/gh0stzk-bspwm-kali.git"
 INSTALL_DIR="$HOME/.local/share/gh0stzk"
 
+# Si el instalador corre desde un clon del repo, se instala esa copia
+# (rama y commit actuales) en vez de descargar master desde GitHub.
+LOCAL_REPO=$(git -C "$(dirname "$0")" rev-parse --show-toplevel 2>/dev/null || true)
+if [ -n "$LOCAL_REPO" ] && [ -d "$LOCAL_REPO/config/bspwm" ]; then
+    REPO_URL="file://$LOCAL_REPO"
+    if ! git -C "$LOCAL_REPO" diff --quiet HEAD 2>/dev/null; then
+        msg_warning "El repo local tiene cambios sin commitear: solo se instala lo commiteado"
+    fi
+fi
+
 msg_info "Repositorio: $REPO_URL"
 msg_info "Destino: $INSTALL_DIR"
 echo
@@ -165,7 +175,7 @@ echo
 
 # Directorios de ~/.config/ a respaldar
 config_dirs=(
-    "bspwm" "alacritty" "cava" "clipcat" "ghostty" "picom" "rofi" "eww" "sxhkd" "dunst"
+    "bspwm" "alacritty" "cava" "clipcat" "picom" "rofi" "eww" "sxhkd" "dunst"
     "jgmenu" "kitty" "polybar" "geany" "gtk-3.0" "ncmpcpp" "yazi" "zsh" "mpd" "mpv"
     "st" "zathura"
 )
@@ -288,7 +298,7 @@ msg_ok "Directorios creados"
 # Copiar configuraciones a ~/.config
 msg_info "Copiando configuraciones a ~/.config/..."
 
-config_dirs=("alacritty" "bspwm" "cava" "clipcat" "dunst" "geany" "ghostty" "gtk-3.0" "jgmenu" "kitty"
+config_dirs=("alacritty" "bspwm" "cava" "clipcat" "dunst" "geany" "gtk-3.0" "jgmenu" "kitty"
              "mpd" "mpv" "ncmpcpp" "systemd" "yazi" "zsh" "st" "zathura")
 
 copied_count=0

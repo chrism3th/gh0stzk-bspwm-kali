@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+# KaliInstaller - Punto de entrada del instalador para Kali Linux
+#
+# Equivalente al RiceInstaller del upstream (Arch). Delega en el instalador
+# modular de install-kali-scripts/. Acepta las mismas opciones:
+#   ./KaliInstaller            Menú interactivo
+#   ./KaliInstaller --full     Instalación completa sin menú
+#   ./KaliInstaller --info     Información del sistema
+#   ./KaliInstaller --help     Ayuda
+#
+# Licensed under GPL-3.0 license
+
+REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+exec bash "$REPO_ROOT/install-kali-scripts/install.sh" "$@"
