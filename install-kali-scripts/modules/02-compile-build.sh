@@ -132,6 +132,17 @@ fi
 msg_ok "Instalación de Rust y herramientas completada"
 echo
 
+# Enlazar binarios de cargo en /usr/local/bin: la sesión X (sxhkd, polybar)
+# no siempre carga ~/.cargo/env; sin esto Colorpicker o Term --yazi pueden fallar.
+for bin in yazi ya xcolor; do
+    if [ -x "$HOME/.cargo/bin/$bin" ]; then
+        run_logged sudo ln -sf "$HOME/.cargo/bin/$bin" "/usr/local/bin/$bin" \
+            || log_error "No se pudo enlazar $bin en /usr/local/bin"
+    fi
+done
+
+echo
+
 # ============================================
 # COMPILACIÓN DE EWW
 # ============================================
@@ -289,69 +300,6 @@ echo
 # HERRAMIENTAS ADICIONALES
 # ============================================
 section_banner "Herramientas Adicionales"
-
-# TDROP
-msg_info "Instalando tdrop..."
-if command_exists tdrop; then
-    msg_ok "tdrop ya está instalado"
-else
-    TDROP_DIR="$TEMP_DIR/tdrop"
-    if run_logged git clone --depth=1 https://github.com/noctuid/tdrop.git "$TDROP_DIR"; then
-        cd "$TDROP_DIR" || exit 1
-        if run_logged sudo make install; then
-            msg_ok "tdrop instalado correctamente"
-        else
-            msg_warning "Error al instalar tdrop"
-            log_error "Fallo make install de tdrop"
-        fi
-        cd - > /dev/null
-    else
-        msg_warning "Error al clonar tdrop"
-        log_error "Fallo git clone de tdrop"
-    fi
-fi
-
-# XQP
-msg_info "Instalando xqp..."
-if command_exists xqp; then
-    msg_ok "xqp ya está instalado"
-else
-    XQP_DIR="$TEMP_DIR/xqp"
-    if run_logged git clone --depth=1 https://github.com/baskerville/xqp.git "$XQP_DIR"; then
-        cd "$XQP_DIR" || exit 1
-        if run_logged make && run_logged sudo make install; then
-            msg_ok "xqp instalado correctamente"
-        else
-            msg_warning "Error al instalar xqp"
-            log_error "Fallo compilación/instalación de xqp"
-        fi
-        cd - > /dev/null
-    else
-        msg_warning "Error al clonar xqp"
-        log_error "Fallo git clone de xqp"
-    fi
-fi
-
-# GREENCLIP
-msg_info "Instalando greenclip..."
-if command_exists greenclip; then
-    msg_ok "greenclip ya está instalado"
-else
-    GREENCLIP_URL="https://github.com/erebe/greenclip/releases/download/v4.2/greenclip"
-    GREENCLIP_DEST="/usr/local/bin/greenclip"
-    if run_logged wget "$GREENCLIP_URL" -O "$TEMP_DIR/greenclip"; then
-        if run_logged sudo cp "$TEMP_DIR/greenclip" "$GREENCLIP_DEST"; then
-            sudo chmod +x "$GREENCLIP_DEST"
-            msg_ok "greenclip instalado en $GREENCLIP_DEST"
-        else
-            msg_warning "Error al copiar greenclip"
-            log_error "Fallo al copiar greenclip"
-        fi
-    else
-        msg_warning "Error al descargar greenclip"
-        log_error "Fallo descarga de greenclip"
-    fi
-fi
 
 # ZSH PLUGINS
 msg_info "Instalando plugins de Zsh..."

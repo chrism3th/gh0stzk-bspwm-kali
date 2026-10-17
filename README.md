@@ -464,7 +464,7 @@ The installation is divided into 4 modules:
    - Rust and Cargo installation
    - eww compilation (Wayland widget system)
    - xwinwrap compilation
-   - Additional tools (eza, yazi, tdrop, etc.)
+   - Additional tools (yazi, xcolor, Zsh plugins)
 
 3. **Fonts & Themes** (`03-fonts-themes.sh`)
    - Nerd Fonts installation

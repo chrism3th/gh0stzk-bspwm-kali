@@ -44,7 +44,7 @@ ${BLD}${CYE}¿Qué se instalará?${CNC}
       • Rust/Cargo + yazi + xcolor
       • eww (ElKowar's Wacky Widgets)
       • xwinwrap (fondos animados)
-      • Herramientas adicionales (tdrop, xqp, greenclip, etc.)
+      • Plugins de Zsh (fzf-tab, history-substring-search)
 
   ${BLD}${CGR}[${CYE}3${CGR}]${CNC} ${BLD}Fuentes y Temas${CNC}
       • Fuentes Nerd Fonts (JetBrains Mono, Terminus, etc.)

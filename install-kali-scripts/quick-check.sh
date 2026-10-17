@@ -157,7 +157,6 @@ echo -e "═══════════════════════�
 compile_tools=(
     "eww:ElKowar's Wacky Widgets"
     "xwinwrap:Fondos de pantalla animados"
-    "tdrop:Dropdown terminal"
     "xcolor:Color picker"
     "yazi:File manager para terminal"
 )

@@ -511,6 +511,17 @@ else
     msg_warning "MPD no está activo (puede iniciarse después del reinicio)"
 fi
 
+# Timer de actualizaciones (módulo Updates de polybar/eww)
+msg_info "Habilitando timer de usuario KaliUpdates..."
+
+systemctl --user daemon-reload >> "$ERROR_LOG" 2>&1
+if systemctl --user enable --now KaliUpdates.timer >> "$ERROR_LOG" 2>&1; then
+    msg_ok "Timer KaliUpdates habilitado (cada 15 min)"
+else
+    msg_warning "Error al habilitar KaliUpdates.timer (el módulo Updates no se refrescará solo)"
+    log_error "Fallo al habilitar KaliUpdates.timer"
+fi
+
 # Configurar shell por defecto (Zsh)
 msg_info "Configurando Zsh como shell por defecto..."
 
