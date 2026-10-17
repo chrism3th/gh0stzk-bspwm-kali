@@ -155,6 +155,7 @@ apt_packages=(
     "libxcb1-dev" "libxcb-randr0-dev" "libxcb-xinerama0-dev"
     "libxcb-icccm4-dev" "libxcb-ewmh-dev" "libxcb-util0-dev"
     "libxcb-shape0-dev" "libxcb-xfixes0-dev" "libxcursor-dev"
+    "libxft-dev" "libimlib2-dev" "libharfbuzz-dev" "libfontconfig-dev" "libfreetype-dev" "zlib1g-dev"
 )
 
 msg_info "Se instalarán ${#apt_packages[@]} paquetes"

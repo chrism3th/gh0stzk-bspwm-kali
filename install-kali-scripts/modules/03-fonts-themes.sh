@@ -141,6 +141,12 @@ for package in "$PKG_DIR"/*.pkg.tar.zst; do
     pkg_basename=$(basename "$package")
     pkg_name=$(echo "$pkg_basename" | cut -d'-' -f1-3)
 
+    # Solo se usan los paquetes de datos (temas, iconos, cursores).
+    # st es un binario de Arch: se compila desde fuente en 02-compile-build.sh
+    case "$pkg_basename" in
+        st-gh0stzk-*) continue ;;
+    esac
+
     msg_info "Procesando: $pkg_basename"
 
     # Crear directorio temporal para este paquete
@@ -149,6 +155,9 @@ for package in "$PKG_DIR"/*.pkg.tar.zst; do
 
     # Descomprimir el paquete
     if tar --use-compress-program=zstd -xf "$package" -C "$extract_dir" >> "$ERROR_LOG" 2>&1; then
+        # Hooks de pacman no sirven en Debian
+        rm -rf "$extract_dir/usr/share/libalpm"
+
         # Verificar si tiene directorio usr/
         if [ -d "$extract_dir/usr" ]; then
             # Copiar archivos al sistema
@@ -183,13 +192,6 @@ fi
 
 # Verificar instalación de paquetes clave
 msg_info "Verificando instalación de paquetes clave..."
-
-# st-gh0stzk (terminal simple)
-if command_exists st; then
-    msg_ok "st-gh0stzk instalado correctamente"
-else
-    msg_warning "st-gh0stzk no detectado"
-fi
 
 # Verificar temas GTK
 if [ -d "/usr/share/themes" ]; then

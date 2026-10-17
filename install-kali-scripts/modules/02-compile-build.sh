@@ -279,6 +279,64 @@ fi
 echo
 
 # ============================================
+# COMPILACIÓN DE ST (fork de gh0stzk)
+# ============================================
+# El paquete st-gh0stzk del repo de gh0stzk es un binario de Arch;
+# se compila desde la fuente para enlazar contra las librerías de Kali.
+section_banner "Compilación de st"
+
+# Un st con librerías faltantes (p. ej. el binario de Arch) cuenta como no instalado
+if command_exists st && ! ldd "$(command -v st)" 2>/dev/null | grep -q "not found"; then
+    msg_ok "st ya está instalado"
+
+    if ! ask_confirm "¿Deseas recompilar st de todas formas?"; then
+        msg_info "Saltando compilación de st"
+    else
+        COMPILE_ST=true
+    fi
+else
+    COMPILE_ST=true
+fi
+
+if [ "${COMPILE_ST:-false}" = true ]; then
+    msg_info "Clonando repositorio de st..."
+    ST_DIR="$TEMP_DIR/st-terminal"
+
+    if run_logged git clone --depth=1 https://github.com/gh0stzk/st-terminal.git "$ST_DIR"; then
+        msg_ok "Repositorio clonado correctamente"
+
+        cd "$ST_DIR" || exit 1
+
+        msg_info "Compilando st..."
+
+        if run_logged make; then
+            msg_ok "Compilación exitosa"
+
+            # make install también registra el terminfo (tic -sx st.info)
+            if run_logged sudo make PREFIX=/usr/local install; then
+                msg_ok "st instalado en /usr/local/bin/st"
+            else
+                msg_error "Fallo al instalar st"
+                log_error "make install de st falló"
+            fi
+
+            run_logged make clean || true
+        else
+            msg_error "Fallo durante la compilación de st"
+            msg_info "Revisa el log: $ERROR_LOG"
+            log_error "Compilación de st falló"
+        fi
+
+        cd - > /dev/null
+    else
+        msg_error "Fallo al clonar repositorio de st"
+        log_error "Git clone st-terminal falló"
+    fi
+fi
+
+echo
+
+# ============================================
 # I3LOCK-COLOR
 # ============================================
 # Kali empaqueta i3lock-color (se instala con apt en 01-setup-packages.sh).
