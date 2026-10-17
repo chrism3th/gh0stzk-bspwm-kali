@@ -2,88 +2,216 @@
 # =============================================================
 # Author:  gh0stzk
 # Repo:    https://github.com/gh0stzk/dotfiles
-# Date:    21.11.2025
+# Date:    21.08.2026
 #
 # Weather - Weather Monitor for Polybar/Eww
 # Features:
+#   ✔ Automatic location detection via IP geolocation
+#     (multi-provider fallback, cached to avoid rate limits)
+#   ✔ Manual coordinate override for inaccurate ISP geolocation
 #   ✔ Obtaining data in real time via API
-#   ✔ Smart cache system (15 minutes)
 #   ✔ Support for Celsius and Fahrenheit formats
-#   ✔ Handling of errors and connection failures
 #
 # Dependencies:
 #   → Core: jq, curl
 #   → Optionals: Polybar, Eww
 #
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # Licensed under GPL-3.0 license
 # =============================================================
 
 # ===== Configuration =====
 KEY="8b05d62206f459e1d298cbe5844d7d87"
-CITY="Mexico City"  # Go to https://openweathermap.org/find to find your city/town
 UNITS="metric" # metric | imperial
 
+# Option 1: force a specific city by name (highest priority).
+# If set, this always wins over both manual coordinates and
+# auto-detected location — neither MANUAL_LAT/LON nor IP geolocation
+# will be used. Go to https://openweathermap.org/find to find your city/town.
+CITY=""
+
+# Option 2: manual coordinate override, used only if CITY is empty.
+# Leave both empty ("") to auto-detect location via IP geolocation.
+# Set both if your ISP's IP geolocation places you in the wrong city.
+# Find your coordinates at https://www.latlong.net/
+MANUAL_LAT=""
+MANUAL_LON=""
+
+# Auto-detected location is cached here to avoid hammering the
+# geolocation providers on every bar refresh.
+CACHE_DIR="$HOME/.cache/$USER"
+LOCATION_CACHE="$CACHE_DIR/weather_state"
+LOCATION_TTL=21600 # seconds (6h) the cached location stays valid
+
+MAX_WAIT=10 # seconds
 # Wait for internet
 wait_for_internet() {
-    while ! curl -fsS --max-time 5 https://google.com >/dev/null 2>&1; do
-        sleep 0.5
+    waited=0
+    while ! curl -fsS --max-time 2 https://google.com >/dev/null 2>&1; do
+        [ "$waited" -ge "$MAX_WAIT" ] && return 1
+        sleep 1
+        waited=$((waited + 1))
     done
 }
 
-# Get weather
-get_weather_data() {
-    encoded_city=$(printf "%s" "$CITY" | sed 's/ /%20/g')
-    url="https://api.openweathermap.org/data/2.5/weather?q=$encoded_city&appid=$KEY&units=$UNITS"
+# Query IP geolocation providers in order until one succeeds.
+# Sets the global LAT / LON on success.
+resolve_ip_location() {
+    local provider data lat lon loc status success
 
-    curl -fsS --max-time 10 "$url"
+    for provider in ipwho ipinfo ip-api; do
+        case "$provider" in
+            ipinfo)
+                data=$(curl -fsS --max-time 3 "https://ipinfo.io/json" 2>/dev/null) || continue
+                loc=$(printf '%s' "$data" | jq -r '.loc // empty' 2>/dev/null)
+                lat=${loc%%,*}
+                lon=${loc#*,}
+                ;;
+            ipwho)
+                data=$(curl -fsS --max-time 3 "https://ipwho.is/" 2>/dev/null) || continue
+                success=$(printf '%s' "$data" | jq -r '.success // empty' 2>/dev/null)
+                [ "$success" = "true" ] || continue
+                lat=$(printf '%s' "$data" | jq -r '.latitude // empty' 2>/dev/null)
+                lon=$(printf '%s' "$data" | jq -r '.longitude // empty' 2>/dev/null)
+                ;;
+            ip-api)
+                data=$(curl -fsS --max-time 3 "http://ip-api.com" 2>/dev/null) || continue
+                status=$(printf '%s' "$data" | jq -r '.status // empty' 2>/dev/null)
+                [ "$status" = "success" ] || continue
+                lat=$(printf '%s' "$data" | jq -r '.lat // empty' 2>/dev/null)
+                lon=$(printf '%s' "$data" | jq -r '.lon // empty' 2>/dev/null)
+                ;;
+        esac
+
+        case "$lat" in '' | null) continue ;; esac
+        case "$lon" in '' | null) continue ;; esac
+
+        LAT="$lat"
+        LON="$lon"
+        return 0
+    done
+
+    return 1
 }
 
-# Parse data
+# Resolve LAT / LON in priority order:
+#   1. Manual override
+#   2. Fresh cache
+#   3. Live IP geolocation lookup (result gets cached)
+#   4. Stale cache as last resort
+get_location() {
+    local c_epoch c_lat c_lon now age
+
+    if [ -n "$MANUAL_LAT" ] && [ -n "$MANUAL_LON" ]; then
+        LAT="$MANUAL_LAT"
+        LON="$MANUAL_LON"
+        return 0
+    fi
+
+    c_epoch=0
+    c_lat=""
+    c_lon=""
+    if [ -f "$LOCATION_CACHE" ]; then
+        read -r c_epoch c_lat c_lon < "$LOCATION_CACHE" 2>/dev/null
+        case "$c_epoch" in '' | *[!0-9]*) c_epoch=0 ;; esac
+
+        now=$(date +%s)
+        age=$((now - c_epoch))
+        if [ -n "$c_lat" ] && [ -n "$c_lon" ] && [ "$age" -lt "$LOCATION_TTL" ]; then
+            LAT="$c_lat"
+            LON="$c_lon"
+            return 0
+        fi
+    fi
+
+    if resolve_ip_location; then
+        mkdir -p "$CACHE_DIR" 2>/dev/null
+        printf '%s %s %s\n' "$(date +%s)" "$LAT" "$LON" > "$LOCATION_CACHE" 2>/dev/null
+        return 0
+    fi
+
+    if [ -n "$c_lat" ] && [ -n "$c_lon" ]; then
+        LAT="$c_lat"
+        LON="$c_lon"
+        return 0
+    fi
+
+    return 1
+}
+
+fetch_weather_data() {
+    if [ -n "$CITY" ]; then
+        encoded_city=$(printf '%s' "$CITY" | sed 's/ /%20/g')
+        url="https://api.openweathermap.org/data/2.5/weather?q=$encoded_city&appid=$KEY&units=$UNITS"
+    else
+        url="https://api.openweathermap.org/data/2.5/weather?lat=$LAT&lon=$LON&appid=$KEY&units=$UNITS"
+    fi
+
+    curl -fsS --max-time 5 "$url"
+}
+
+get_weather_data() {
+    wait_for_internet || return 1
+
+    data=$(fetch_weather_data) || return 1
+
+    cod=$(printf '%s' "$data" | jq -r '.cod // empty' 2>/dev/null)
+    [ "$cod" = "200" ] || return 1
+
+    printf '%s' "$data"
+}
+
+# Parse all fields in a single jq call
 parse_weather_values() {
-    data=$1
-    W_TEMP=$(echo "$data" | jq -r '.main.temp | round')
-    W_FEELS=$(echo "$data" | jq -r '.main.feels_like | round')
-    W_DESC=$(echo "$data" | jq -r '.weather[0].description')
-    W_ICON=$(echo "$data" | jq -r '.weather[0].icon')
+    fields=$(printf '%s' "$1" | jq -r '[(.main.temp|round), (.main.feels_like|round), .weather[0].description, .weather[0].icon, .name] | @tsv')
+    old_ifs=$IFS
+    IFS='	'
+    set -- $fields
+    IFS=$old_ifs
+    W_TEMP=$1
+    W_FEELS=$2
+    W_DESC=$3
+    W_ICON=$4
+    W_CITY=$5
 }
 
 # Icons
 get_weather_icon() {
     case "$1" in
-        "01d") echo "" ;;
-        "01n") echo "" ;;
-        "02d") echo "" ;;
-        "02n") echo "" ;;
-        "03d"|"03n") echo "" ;;
-        "04d"|"04n") echo "" ;;
-        "09d"|"09n") echo "" ;;
-        "10d") echo "" ;;
-        "10n") echo "" ;;
-        "11d"|"11n") echo "" ;;
-        "13d"|"13n") echo "" ;;
-        "50d"|"50n") echo "" ;;
-        *) echo "" ;;
+        01d) printf '' ;;
+        01n) printf '' ;;
+        02d) printf '' ;;
+        02n) printf '' ;;
+        03d|03n) printf '' ;;
+        04d|04n) printf '' ;;
+        09d|09n) printf '' ;;
+        10d) printf '' ;;
+        10n) printf '' ;;
+        11d|11n) printf '' ;;
+        13d|13n) printf '' ;;
+        50d|50n) printf '' ;;
+        *) printf '' ;;
     esac
 }
 
-# Colors
 get_weather_hex() {
-    icon_prefix=$(echo "$1" | cut -c1-2)
-    case "$icon_prefix" in
-        "01") echo "#ffd86b" ;;
-        "02"|"03"|"04") echo "#adadff" ;;
-        "09"|"10") echo "#6b95ff" ;;
-        "11") echo "#ffeb57" ;;
-        "13") echo "#e3e6fc" ;;
-        "50") echo "#84afdb" ;;
-        *) echo "#adadff" ;;
+    case "$1" in
+        01*) printf '#ffd86b' ;;
+        02*|03*|04*) printf '#adadff' ;;
+        09*|10*) printf '#6b95ff' ;;
+        11*) printf '#ffeb57' ;;
+        13*) printf '#e3e6fc' ;;
+        50*) printf '#84afdb' ;;
+        *) printf '#adadff' ;;
     esac
 }
 
 # Execution
-wait_for_internet
-weather_data=$(get_weather_data || exit 1)
+if [ -z "$CITY" ]; then
+    get_location || exit 1
+fi
+
+weather_data=$(get_weather_data) || exit 1
 parse_weather_values "$weather_data"
 
 case "$1" in
@@ -91,14 +219,14 @@ case "$1" in
         echo "$W_TEMP"
         ;;
     "current_temp_fahrenheit")
-        temp_f=$(expr \( "$W_TEMP" \* 9 / 5 \) + 32)
+        temp_f=$(printf '%s' "$weather_data" | jq -r '((.main.temp * 9 / 5) + 32) | round')
         echo "${temp_f}°F"
         ;;
     "feels_like")
         echo "${W_FEELS}°C"
         ;;
     "weather_desc")
-        echo "$W_DESC" | sed 's/.*/\u&/'
+        printf '%s\n' "$W_DESC" | awk '{ print toupper(substr($0,1,1)) substr($0,2) }'
         ;;
     "icon")
         get_weather_icon "$W_ICON"
@@ -110,7 +238,14 @@ case "$1" in
         echo "$weather_data"
         ;;
     "city")
-        echo "$CITY"
+        echo "$W_CITY"
+        ;;
+    "location")
+        if [ -n "$CITY" ]; then
+            echo "$CITY"
+        else
+            printf '%s, %s\n' "$LAT" "$LON"
+        fi
         ;;
     "wmodule")
         icon=$(get_weather_icon "$W_ICON")

@@ -1,12 +1,14 @@
 #############################
 #		Cynthia Theme		#
 #############################
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # https://github.com/gh0stzk/dotfiles
 
 # (Kanagawa Dragon) colorscheme
 bg="#181616"
+bg_alt="#00181616"
 fg="#c5c9c5"
+trans="#00181616"
 
 black="#0d0c0c"
 red="#c4746e"
@@ -25,17 +27,30 @@ magentab="#938AA9"
 cyanb="#7AA89F"
 whiteb="#c5c9c5"
 
-accent_color="#1c1a1a"
+# Extend
+purple="#957fb8"
+amber="#b6a262"
+pink="#b98d9b"
+orange="#b98166"
+indigo="#625e91"
+lime="#a6a374"
+grey="#727169"
+bluegray="#6a7b8c"
+
+accent_color="#211F1F"
 arch_icon="#0f94d2"
+
+# Bar
+main_bar="bar05"
 
 # Bspwm options
 BORDER_WIDTH="0"		# Bspwm border
-TOP_PADDING="47"
-BOTTOM_PADDING="47"
+TOP_PADDING="1"
+BOTTOM_PADDING="1"
 LEFT_PADDING="1"
 RIGHT_PADDING="1"
-NORMAL_BC="#0d0c0c"		# Normal border color
-FOCUSED_BC="#938AA9"	# Focused border color
+NORMAL_BC="$black"      # Normal border color
+FOCUSED_BC="$magentab"  # Focused border color
 
 # Terminal font & size
 term_font_size="10"

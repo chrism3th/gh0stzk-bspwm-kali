@@ -95,23 +95,6 @@ if ensure_rust_and_cargo; then
     msg_ok "Rust/Cargo listos (si aplica)"
 fi
 
-# Instalar eza (reemplazo moderno de ls)
-if [ "$HAS_CARGO" = true ] && command_exists cargo; then
-    if command_exists eza; then
-        msg_ok "eza ya está instalado"
-    else
-        msg_info "Instalando eza..."
-        if run_logged cargo install eza; then
-            msg_ok "eza instalado correctamente"
-        else
-            msg_warning "Fallo al instalar eza (no crítico)"
-            log_error "Fallo al instalar eza desde cargo"
-        fi
-    fi
-else
-    msg_warning "Cargo no disponible; omitiendo instalación de eza"
-fi
-
 # Instalar yazi (file manager para terminal)
 if [ "$HAS_CARGO" = true ] && command_exists cargo; then
     if command_exists yazi; then
@@ -129,7 +112,35 @@ else
     msg_warning "Cargo no disponible; omitiendo instalación de yazi"
 fi
 
+# Instalar xcolor (color picker usado por Colorpicker)
+if [ "$HAS_CARGO" = true ] && command_exists cargo; then
+    if command_exists xcolor; then
+        msg_ok "xcolor ya está instalado"
+    else
+        msg_info "Instalando xcolor..."
+        if run_logged cargo install --locked xcolor; then
+            msg_ok "xcolor instalado correctamente"
+        else
+            msg_warning "Fallo al instalar xcolor (no crítico)"
+            log_error "Fallo al instalar xcolor desde cargo"
+        fi
+    fi
+else
+    msg_warning "Cargo no disponible; omitiendo instalación de xcolor"
+fi
+
 msg_ok "Instalación de Rust y herramientas completada"
+echo
+
+# Enlazar binarios de cargo en /usr/local/bin: la sesión X (sxhkd, polybar)
+# no siempre carga ~/.cargo/env; sin esto Colorpicker o Term --yazi pueden fallar.
+for bin in yazi ya xcolor; do
+    if [ -x "$HOME/.cargo/bin/$bin" ]; then
+        run_logged sudo ln -sf "$HOME/.cargo/bin/$bin" "/usr/local/bin/$bin" \
+            || log_error "No se pudo enlazar $bin en /usr/local/bin"
+    fi
+done
+
 echo
 
 # ============================================
@@ -268,135 +279,77 @@ fi
 echo
 
 # ============================================
-# COMPILACIÓN DE I3LOCK-COLOR
+# COMPILACIÓN DE ST (fork de gh0stzk)
 # ============================================
-section_banner "Compilación de i3lock-color"
+# El paquete st-gh0stzk del repo de gh0stzk es un binario de Arch;
+# se compila desde la fuente para enlazar contra las librerías de Kali.
+section_banner "Compilación de st"
 
-if command_exists i3lock-color; then
-    msg_ok "i3lock-color ya está instalado"
+# Un st con librerías faltantes (p. ej. el binario de Arch) cuenta como no instalado
+if command_exists st && ! ldd "$(command -v st)" 2>/dev/null | grep -q "not found"; then
+    msg_ok "st ya está instalado"
 
-    if ! ask_confirm "¿Deseas recompilar i3lock-color de todas formas?"; then
-        msg_info "Saltando compilación de i3lock-color"
+    if ! ask_confirm "¿Deseas recompilar st de todas formas?"; then
+        msg_info "Saltando compilación de st"
     else
-        COMPILE_I3LOCK=true
+        COMPILE_ST=true
     fi
 else
-    COMPILE_I3LOCK=true
+    COMPILE_ST=true
 fi
 
-if [ "${COMPILE_I3LOCK:-false}" = true ]; then
-    msg_info "Instalando dependencias para i3lock-color..."
+if [ "${COMPILE_ST:-false}" = true ]; then
+    msg_info "Clonando repositorio de st..."
+    ST_DIR="$TEMP_DIR/st-terminal"
 
-    # Lista de dependencias necesarias
-    i3lock_deps=(
-        "autoconf" "gcc" "make" "pkg-config"
-        "libpam0g-dev" "libcairo2-dev" "libfontconfig1-dev"
-        "libxcb-composite0-dev" "libev-dev" "libx11-xcb-dev"
-        "libxcb-xkb-dev" "libxcb-xinerama0-dev" "libxcb-randr0-dev"
-        "libxcb-image0-dev" "libxcb-util-dev" "libxcb-xrm-dev"
-        "libxkbcommon-dev" "libxkbcommon-x11-dev" "libjpeg-dev"
-    )
-
-    deps_to_install=()
-    for dep in "${i3lock_deps[@]}"; do
-        if ! dpkg -l | grep -q "^ii  $dep"; then
-            deps_to_install+=("$dep")
-        fi
-    done
-
-    if [ ${#deps_to_install[@]} -gt 0 ]; then
-        msg_info "Instalando ${#deps_to_install[@]} dependencias..."
-        if run_logged sudo apt install -y "${deps_to_install[@]}"; then
-            msg_ok "Dependencias instaladas correctamente"
-        else
-            msg_error "Error al instalar dependencias de i3lock-color"
-            msg_warning "Algunas dependencias pueden faltar, continuando de todas formas..."
-            log_error "Fallo al instalar dependencias de i3lock-color"
-        fi
-    else
-        msg_ok "Todas las dependencias ya están instaladas"
-    fi
-
-    msg_info "Clonando repositorio de i3lock-color..."
-    I3LOCK_DIR="$TEMP_DIR/i3lock-color"
-
-    if run_logged git clone --depth=1 https://github.com/Raymo111/i3lock-color.git "$I3LOCK_DIR"; then
+    if run_logged git clone --depth=1 https://github.com/gh0stzk/st-terminal.git "$ST_DIR"; then
         msg_ok "Repositorio clonado correctamente"
 
-        cd "$I3LOCK_DIR" || exit 1
+        cd "$ST_DIR" || exit 1
 
-        msg_info "Compilando i3lock-color (puede tomar unos minutos)..."
+        msg_info "Compilando st..."
 
-        # Usar el script de instalación provisto
-        if [ -f "install-i3lock-color.sh" ]; then
-            chmod +x install-i3lock-color.sh
-            if run_logged ./install-i3lock-color.sh; then
-                msg_ok "i3lock-color instalado correctamente mediante script oficial"
+        if run_logged make; then
+            msg_ok "Compilación exitosa"
+
+            # make install también registra el terminfo (tic -sx st.info)
+            if run_logged sudo make PREFIX=/usr/local install; then
+                msg_ok "st instalado en /usr/local/bin/st"
             else
-                msg_warning "Script oficial falló, intentando método manual..."
-                log_error "install-i3lock-color.sh falló, probando método manual"
-
-                # Método manual
-                if run_logged ./build.sh; then
-                    msg_ok "Compilación exitosa"
-
-                    if [ -f "x86_64-pc-linux-gnu/release/i3lock" ]; then
-                        if run_logged sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color; then
-                            sudo chmod +x /usr/local/bin/i3lock-color
-                            msg_ok "i3lock-color instalado en /usr/local/bin/i3lock-color"
-                        else
-                            msg_error "Fallo al copiar binario de i3lock-color"
-                            log_error "Fallo al copiar i3lock-color a /usr/local/bin"
-                        fi
-                    else
-                        msg_error "El binario de i3lock-color no fue creado"
-                        log_error "Binario de i3lock-color no encontrado después de compilación"
-                    fi
-                else
-                    msg_error "Fallo durante la compilación de i3lock-color"
-                    msg_info "Revisa el log: $ERROR_LOG"
-                    log_error "Compilación de i3lock-color falló"
-                fi
+                msg_error "Fallo al instalar st"
+                log_error "make install de st falló"
             fi
+
+            run_logged make clean || true
         else
-            msg_warning "Script de instalación no encontrado, usando método manual..."
-
-            # Método manual clásico
-            if run_logged ./build.sh; then
-                msg_ok "Compilación exitosa"
-
-                if [ -f "x86_64-pc-linux-gnu/release/i3lock" ]; then
-                    if run_logged sudo cp x86_64-pc-linux-gnu/release/i3lock /usr/local/bin/i3lock-color; then
-                        sudo chmod +x /usr/local/bin/i3lock-color
-                        msg_ok "i3lock-color instalado en /usr/local/bin/i3lock-color"
-                    else
-                        msg_error "Fallo al copiar binario de i3lock-color"
-                        log_error "Fallo al copiar i3lock-color a /usr/local/bin"
-                    fi
-                else
-                    msg_error "El binario de i3lock-color no fue creado"
-                    log_error "Binario de i3lock-color no encontrado después de compilación"
-                fi
-            else
-                msg_error "Fallo durante la compilación de i3lock-color"
-                msg_info "Revisa el log: $ERROR_LOG"
-                log_error "Compilación de i3lock-color falló"
-            fi
-        fi
-
-        # Verificar instalación
-        if command_exists i3lock-color; then
-            msg_ok "i3lock-color instalado y verificado"
-        else
-            msg_warning "i3lock-color compilado pero no encontrado en PATH"
-            msg_info "Puede que necesites reiniciar o actualizar tu PATH"
+            msg_error "Fallo durante la compilación de st"
+            msg_info "Revisa el log: $ERROR_LOG"
+            log_error "Compilación de st falló"
         fi
 
         cd - > /dev/null
     else
-        msg_error "Fallo al clonar repositorio de i3lock-color"
-        log_error "Git clone i3lock-color falló"
+        msg_error "Fallo al clonar repositorio de st"
+        log_error "Git clone st-terminal falló"
     fi
+fi
+
+echo
+
+# ============================================
+# I3LOCK-COLOR
+# ============================================
+# Kali empaqueta i3lock-color (se instala con apt en 01-setup-packages.sh).
+# Provee /usr/bin/i3lock, que es lo que llama ScreenLocker.
+section_banner "Verificación de i3lock-color"
+
+if dpkg -s i3lock-color >/dev/null 2>&1; then
+    msg_ok "i3lock-color instalado desde apt"
+elif run_logged sudo apt install -y i3lock-color; then
+    msg_ok "i3lock-color instalado desde apt"
+else
+    msg_warning "No se pudo instalar i3lock-color (ScreenLocker no funcionará)"
+    log_error "apt install i3lock-color falló"
 fi
 
 echo
@@ -405,69 +358,6 @@ echo
 # HERRAMIENTAS ADICIONALES
 # ============================================
 section_banner "Herramientas Adicionales"
-
-# TDROP
-msg_info "Instalando tdrop..."
-if command_exists tdrop; then
-    msg_ok "tdrop ya está instalado"
-else
-    TDROP_DIR="$TEMP_DIR/tdrop"
-    if run_logged git clone --depth=1 https://github.com/noctuid/tdrop.git "$TDROP_DIR"; then
-        cd "$TDROP_DIR" || exit 1
-        if run_logged sudo make install; then
-            msg_ok "tdrop instalado correctamente"
-        else
-            msg_warning "Error al instalar tdrop"
-            log_error "Fallo make install de tdrop"
-        fi
-        cd - > /dev/null
-    else
-        msg_warning "Error al clonar tdrop"
-        log_error "Fallo git clone de tdrop"
-    fi
-fi
-
-# XQP
-msg_info "Instalando xqp..."
-if command_exists xqp; then
-    msg_ok "xqp ya está instalado"
-else
-    XQP_DIR="$TEMP_DIR/xqp"
-    if run_logged git clone --depth=1 https://github.com/baskerville/xqp.git "$XQP_DIR"; then
-        cd "$XQP_DIR" || exit 1
-        if run_logged make && run_logged sudo make install; then
-            msg_ok "xqp instalado correctamente"
-        else
-            msg_warning "Error al instalar xqp"
-            log_error "Fallo compilación/instalación de xqp"
-        fi
-        cd - > /dev/null
-    else
-        msg_warning "Error al clonar xqp"
-        log_error "Fallo git clone de xqp"
-    fi
-fi
-
-# GREENCLIP
-msg_info "Instalando greenclip..."
-if command_exists greenclip; then
-    msg_ok "greenclip ya está instalado"
-else
-    GREENCLIP_URL="https://github.com/erebe/greenclip/releases/download/v4.2/greenclip"
-    GREENCLIP_DEST="/usr/local/bin/greenclip"
-    if run_logged wget "$GREENCLIP_URL" -O "$TEMP_DIR/greenclip"; then
-        if run_logged sudo cp "$TEMP_DIR/greenclip" "$GREENCLIP_DEST"; then
-            sudo chmod +x "$GREENCLIP_DEST"
-            msg_ok "greenclip instalado en $GREENCLIP_DEST"
-        else
-            msg_warning "Error al copiar greenclip"
-            log_error "Fallo al copiar greenclip"
-        fi
-    else
-        msg_warning "Error al descargar greenclip"
-        log_error "Fallo descarga de greenclip"
-    fi
-fi
 
 # ZSH PLUGINS
 msg_info "Instalando plugins de Zsh..."

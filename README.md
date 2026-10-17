@@ -28,10 +28,12 @@ The main goal of this project is to preserve all the functionalities and feature
 This fork includes several adaptations to make the dotfiles work seamlessly on Kali Linux:
 
 - **Package Manager Migration**: All `pacman`/`paru` commands have been replaced with `apt` equivalents
-- **Update System**: The Updates script now uses `apt list --upgradable` instead of Arch-specific `checkupdates`
+- **Update System**: The Updates script syncs apt package lists into a private cache (no `sudo`), like `checkupdates` does on Arch
 - **Clipboard Manager**: Replaced `clipcat` (AUR-only) with `copyq` (available in Kali repos)
-- **Modular Installer**: New installation system with 4 organized modules for easier troubleshooting
-- **Systemd Services**: Renamed from ArchUpdates to KaliUpdates for clarity
+- **Modular Installer**: Single entry point (`./KaliInstaller`) backed by 4 modules for easier troubleshooting
+- **Systemd Services**: Renamed from ArchUpdates to KaliUpdates, enabled automatically by the installer
+- **Native builds**: `st` is compiled from gh0stzk's source and `i3lock-color` comes from the Kali repos
+- **Not included**: Ghostty and the Android MTP mounter (`simple-mtpfs`) are not packaged for Kali and were removed
 
 I recommend reading the original README from gh0stzk before proceeding to install this fork. The new modular installation system is more reliable and allows you to install components step-by-step if needed.
 
@@ -60,19 +62,52 @@ You can switch themes instantly, with no need to restart your session or environ
 
 #### Consistency Across the Environment
 
-Each theme not only changes the appearance of bspwm but also instantly transforms the color scheme in terminals (Alacritty & Kitty), eww widgets, polybar bars, notifications, gtk theme, launchers and more. Visual harmony is guaranteed in every corner of your system.
+Unlike Matugen, Pywal, and other wallpaper-based theming tools, colors are not extracted from images. Every theme includes a handcrafted color palette, carefully selected to maintain consistency, readability, and visual appeal.
+
+A modular theming system propagates these colors across the entire desktop environment. Switching themes instantly updates:
+
+- BSPWM
+- GTK (3.x)
+- Dunst
+- Rofi
+- Terminals
+  - Alacritty
+  - Kitty
+  - St
+  - Xfce-terminal
+- Neovim
+- Eww
+- Firefox
+- Jgmenu
+- Geany
+- ScreenLocker (i3lock-color)
+- Mpv Player
+- Cava
+- Zathura
+- Polybar
+- Cli-Tools
+  - Yazi
+  - Fzf-Tab
+  - Bat
+  - Eza
+  - Ncmpcpp
+
+Not all modules are enabled.
+
+If you want to know how it works and how to enable or disable modules, go to [Color Modules](https://github.com/gh0stzk/dotfiles/wiki/Color-Modules)
+
+ToDo-List:
+
+- Obsidian
+- Telegram-desktop
+- Steam
+- Btop
+- Qt (5/6)
+- Rmpc
 
 #### Performance optimized
 
-BSPWM is not a desktop environment (DE), and that’s exactly what makes it stand out in terms of lightweight performance. On my systems, my BSPWM-dotfiles environment starts with under **500 MB of RAM usage**. While these numbers don't tell the whole story, they do highlight the minimalist approach that a window manager should embrace.
-
-It’s true that Wayland-based environments like Hyprland and Sway are modern and popular, but they come at a cost — for instance, Hyprland typically starts with nearly 1 GB of memory usage, which contradicts the idea of being truly lightweight.
-
-Thanks to the latest major update to Picom, we now have stable and lightweight animations on X11. Additionally, I’ve optimized my setup to avoid unnecessary service reloads. Unlike distributions such as Archcraft or other dotfiles in the web —which restart bspwm, sxhkd, picom, dunst, and others whenever the theme changes— my environment keeps these services running without interruption.
-
-It’s designed so that services/daemons which only need to be launched once do so correctly, and aren’t restarted every time a theme is switched. Changing the theme doesn’t require restarting bspwm, since it’s entirely possible to update its appearance using bspc without reloading the window manager.
-
-In short, my setup is faster, smoother, and more stable than what’s provided by preconfigured distributions.
+BSPWM is not a desktop environment (DE), and that’s exactly what makes it stand out in terms of lightweight performance. On my systems, my BSPWM-dotfiles environment starts with under **600 MB of RAM usage**. While these numbers don't tell the whole story, they do highlight the minimalist approach that a window manager should embrace.
 
 In addition, each theme can be configured independently — either by manually editing the theme’s configuration file or using my RiceEditor application. This ensures a high level of customization: if you want a minimalist setup for a specific theme, you can disable animations, shadows, rounded borders, or fading effects. On the other hand, if you prefer a more visually rich theme with all those features enabled, that’s fully supported as well. My dotfiles are built to provide that level of flexibility.
 
@@ -88,29 +123,17 @@ You can check the Wiki [👉 Monitors Setup](https://github.com/gh0stzk/dotfiles
 
 Is an application designed to simplify the customization of your current theme. It allows you to easily adjust various visual and configuration aspects, tailoring your environment to your preferences without the need to manually edit configuration files.
 
-#### Eww Widgets
-
-4 different widgets, including a calendar, music player, profile card and a cheatsheet. These widgets are not only functional but also instantly adapt to the color scheme of the selected theme.
-
-#### Jgmenu
-
-Explore an elegant right-click menu (Desktop) made with Jgmenu, which also syncs with themes for flawless visual consistency.
-
-#### LockScreen
-
-The lockscreen automatically adapts to the active theme and offers two locking options: it can capture the current screen with a blur effect, or use a specific wallpaper depending on the current theme.
-
 #### Wallpaper Engines
 
 My dotfiles support **5 different methods** for setting your favorite wallpaper:
 
-1. **Theme**: Sets a random wallpaper from the theme’s Walls directory. (Default)
+1. **Random**: Sets a random wallpaper from the theme’s Walls directory.
 2. **CustomDir**: Sets a random wallpaper from a directory you specify.
-3. **CustomImage**: Sets a specific image as wallpaper.
+3. **Default**: Sets a specific image as wallpaper. (Default)
 4. **CustomAnimated**: Supports animated wallpapers (.mp4, .mkv, .gif).
 5. **Slideshow**: Changes the wallpaper every 15 minutes with a random image from the theme’s Walls directory.
 
-Each option is **theme-specific**, meaning you can have an animated wallpaper in one theme, a static image in another, or a custom directory in a third — And all your settings will be preserved per theme. By default, all themes load a random wallpaper from their Walls folder.
+Each option is **theme-specific**, meaning you can have an animated wallpaper in one theme, a static image in another, or a custom directory in a third — And all your settings will be preserved per theme. By default, all themes load a default wallpaper from their Walls Rice folder.
 
 Check the wiki for more details: [👉 Wallpapers Configuration](https://github.com/gh0stzk/dotfiles/wiki/Wallpapers-Configuration)
 
@@ -119,10 +142,6 @@ Check the wiki for more details: [👉 Wallpapers Configuration](https://github.
 A _scratchpad_ is a tool designed to provide quick, temporary access to applications or notes without disrupting the desktop workflow. When activated, the scratchpad appears over the current workspace, allowing the user to access applications like a terminal, text editor, or any configured tool. Minimizing it hides the scratchpad from view but keeps it running in the background, ready to be reopened with a simple keyboard shortcut.
 
 It's ideal for quick note-taking, running commands, or accessing auxiliary tools without losing focus on the current task.
-
-#### Visual Composition and Animations
-
-Each theme features a unique color palette, along with transparencies, shadows, and animations—all designed to maintain visual balance without impacting performance or overwhelming the environment.
 
 #### Rofi Applets
 
@@ -133,10 +152,9 @@ Rofi applets to simplify your workflow:
 - Bluetooth Controller
 - Clipboard Manager
 - Screenshot Tool
-- Android MTP Manager
 - Power Menu
 - Keyboard Layout
-- Terminal Selector (Alacritty or Kitty)
+- Terminal Selector (Alacritty, Kitty and ST)
 - Rofi app launcher style selector
 - Tab app switcher
 - Pass Manager (Using pass app)
@@ -180,6 +198,10 @@ Optimized, native ZSH configuration. Not __Oh-My-Zsh__ or other bloated plugin m
 | :traffic_light: Wallpaper Selector |
 |:-:|
 |![Shot-2024-11-08-134530](https://github.com/user-attachments/assets/dbac8c47-f12c-4242-97d6-38ad1193f76b)|
+
+| :tshirt: Bar Selector |
+|:-:|
+|![Bspwm Bar Selector](https://github.com/user-attachments/assets/94c4d699-890c-47d4-85dc-8e9622f4c679)|
 
 ### 🎨 The themes
 
@@ -264,9 +286,9 @@ Optimized, native ZSH configuration. Not __Oh-My-Zsh__ or other bloated plugin m
 | :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
 |                                                 Power Menu                                                 |                                                Screenshoter                                                |
 
-| ![Shot-2024-11-09-132031](https://github.com/user-attachments/assets/0893b0b6-1211-43cb-9923-f4e42af70f4b) | ![Shot-2024-11-09-133244](https://github.com/user-attachments/assets/03546cb9-cf0d-42a2-b424-458c887e67c2) |
-| :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
-|                                              Keyboard Layout                                               |                                               Android Mount                                                |
+| ![Shot-2024-11-09-132031](https://github.com/user-attachments/assets/0893b0b6-1211-43cb-9923-f4e42af70f4b) |
+| :---: |
+| Keyboard Layout |
 
 | ![Shot-2024-11-09-150142](https://github.com/user-attachments/assets/f7d1c404-c2e8-43c0-ad5e-6b052e3918c3) | ![Shot-2024-11-09-155335](https://github.com/user-attachments/assets/889d2ccf-beff-402d-8804-6d82c5638860) |
 | :--------------------------------------------------------------------------------------------------------: | :--------------------------------------------------------------------------------------------------------: |
@@ -303,10 +325,6 @@ Optimized, native ZSH configuration. Not __Oh-My-Zsh__ or other bloated plugin m
 | :---: | :---: |
 | Profile Panel | Music Player |
 
-| ![Shot-2024-11-10-000520](https://github.com/user-attachments/assets/a0871d4e-5b2b-4e64-ae79-617feec71cf1) |
-| :--------------------------------------------------------------------------------------------------------: |
-|                                                Cheat Sheet                                                 |
-
 ---
 
 ### Rice Editor
@@ -341,11 +359,17 @@ https://github.com/user-attachments/assets/79764678-c519-4a41-a333-2a862a6d10f8
 | :--------------------------------------------------------------------------------------------------: |
 |            The environment changes with each theme. In the gif: (Ranger, Thunar, Ncmpcpp)            |
 
+### Firefox theme
+
+| Firefox theme - z0mbi3 Fox |
+|:-:|
+| <img src="https://github.com/user-attachments/assets/877774da-1d27-4e9e-bd79-b084cf0c293e" alt="Firefox theme - z0mbi3-Fox" align="center"> |
+
 ### Neovim setup
 
 | Neovim setup |
 |:-:|
-| ![Neovim setup](https://github.com/user-attachments/assets/a70a0ebb-9921-4d2d-88f3-5eabdc5d10f9) |
+| ![Neovim setup](https://github.com/user-attachments/assets/deff5074-3d9b-4f00-8edd-82c83b6dccf4) |
 | Plugins included [Neovim setup wiki](https://github.com/gh0stzk/dotfiles/wiki/Neovim-setup) |
 
 ## Very useful keybindigs to know...
@@ -356,6 +380,7 @@ https://github.com/user-attachments/assets/79764678-c519-4a41-a333-2a862a6d10f8
 | `super` + `Enter`<br>`super` + `alt` + `Enter` | Open a terminal<br>Open a floating terminal. |
 | `alt` + `@space` | Display menu to select a theme. |
 | `super` + `@space` | Apps Menu. |
+| `super` + `alt` + `@space` | Bar Selector. |
 | `super` + `alt` + `w`| Opens a menu to select a wallpaper. |
 | `super` + `alt` + `h`<br>`super` + `alt` + `u` | Hides bar/s<br>unhide bar/s |
 | `super` + `alt` + `s` | Takes screenshot. |
@@ -393,7 +418,7 @@ And more.. You need to look sxhkdrc file for more, or press Alt + F1 for a cheat
 ### 💾 Installation:
 
 > [!NOTE]
-> The installer only works for **Kali** Linux and Debian-based distros. Some dependencies (like i3lock-color) may need to be installed manually on non-Kali systems.
+> The installer only works for **Kali** Linux and Debian-based distros. On non-Kali systems some packages (like `i3lock-color`) may not be in the repos.
 
 > [!IMPORTANT]
 > **New Modular Installation System**: The installation has been completely redesigned with a modular approach. You can now:
@@ -404,74 +429,60 @@ And more.. You need to look sxhkdrc file for more, or press Alt + F1 for a cheat
 
 #### Quick Installation (Recommended)
 
-Clone the repository and run the main installer:
+Clone the repository and run the installer:
 
 ```sh
-# Clone the repository
-git clone --depth=1 https://github.com/ChrisMethsillo/gh0stzk-bspwm-kali.git
+git clone --depth=1 https://github.com/chrism3th/gh0stzk-bspwm-kali.git
 cd gh0stzk-bspwm-kali
-
-# Update your system first
-sudo apt-get update
-
-# Run the installer
-cd install-kali-scripts
-chmod +x install.sh
-./install.sh
+./KaliInstaller
 ```
 
-The installer will present you with an interactive menu where you can:
-1. **Full Installation** - Installs everything automatically
-2. **Module Selection** - Choose which components to install
-3. **System Information** - Check system compatibility
-4. **Help** - View detailed information
+The installer installs the dotfiles from the clone you run it from (current branch and commit), so you can test a branch before merging it.
+
+Options:
+
+| Command | Description |
+| --- | --- |
+| `./KaliInstaller` | Interactive menu (full install, pick a module, system info) |
+| `./KaliInstaller --full` | Full installation without the menu |
+| `./KaliInstaller --info` | Show system information and installed tools |
+| `./KaliInstaller --help` | Show help |
 
 #### Installation Modules
 
-The installation is divided into 4 modules:
+The installation is divided into 4 modules, run in this order:
 
 1. **Setup & Packages** (`01-setup-packages.sh`)
-   - System verification (RAM, disk space, internet)
-   - APT packages installation (~100 packages)
-   - Repository updates
+   - System verification (disk space, internet, not running as root)
+   - APT packages (bspwm, polybar, picom, rofi, dunst, i3lock-color, copyq, etc.)
 
 2. **Compile & Build** (`02-compile-build.sh`)
-   - Rust and Cargo installation
-   - eww compilation (Wayland widget system)
-   - xwinwrap compilation
-   - Additional tools (eza, yazi, tdrop, etc.)
+   - Rust/Cargo, yazi and xcolor (symlinked into `/usr/local/bin`)
+   - eww (X11 build)
+   - xwinwrap (animated wallpapers)
+   - st (gh0stzk's fork, built from source)
+   - Zsh plugins (fzf-tab, history-substring-search)
 
 3. **Fonts & Themes** (`03-fonts-themes.sh`)
-   - Nerd Fonts installation
-   - GTK themes, icons, and cursors
-   - gh0stzk custom packages extraction
+   - Nerd Fonts
+   - gh0stzk GTK themes, icons and cursors
 
 4. **Dotfiles & Configuration** (`04-dotfiles-config.sh`)
-   - Dotfiles installation
-   - Backup creation
-   - Systemd services configuration
-   - First-time setup
+   - Backup of your current configs to `~/.RiceBackup/`
+   - Dotfiles installation (optional Neovim config; Firefox theme if a profile exists)
+   - Services: MPD (user), KaliUpdates timer, Zsh as default shell
+   - Virtual machine tweaks for Picom
 
-#### Manual Module Installation
-
-If you prefer to install modules individually:
-
-```sh
-cd install-kali-scripts
-
-# Install specific modules
-./modules/01-setup-packages.sh
-./modules/02-compile-build.sh
-./modules/03-fonts-themes.sh
-./modules/04-dotfiles-config.sh
-```
+Every module can also be run on its own, e.g. `./install-kali-scripts/modules/02-compile-build.sh`.
+A single log of the whole run is written to `~/RiceError-<date>.log`.
 
 #### Troubleshooting
 
 - If a module fails, check the error message and fix the issue
 - You can re-run individual modules without affecting others
 - Module 2 (Compile & Build) takes the longest due to Rust/eww compilation
-- On virtual machines, change Picom backend from `glx` to `xrender` before rebooting
+- On virtual machines the installer switches Picom to the `xrender` backend automatically
+- Check `~/RiceError-<date>.log` for the full output of every step
 
 #### Post-Installation
 

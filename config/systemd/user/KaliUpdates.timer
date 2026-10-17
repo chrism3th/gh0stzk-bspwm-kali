@@ -1,5 +1,5 @@
 [Unit]
-Description=Run ArchUpdates.service every 15 minutes
+Description=Run KaliUpdates.service every 15 minutes
 
 [Timer]
 OnStartupSec=10s

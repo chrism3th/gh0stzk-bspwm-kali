@@ -8,7 +8,7 @@
 # Info:  Script to set animated backgrounds using
 #        xwinwrap and mpv. Supports automatic aspect ratio adjustment.
 #
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # Licensed under GPL-3.0 license
 # =============================================================
 
@@ -57,7 +57,7 @@ start() {
 
         # INFO: for each screen, launch the video with the appropriate aspect ratio
         xwinwrap -g "$geometry" -un -fdt -ni -b -nf \
-            -- mpv --hwdec=auto -vo x11 --no-audio --no-border --no-config \
+            -- mpv --hwdec=auto-safe --vo=gpu --profile=fast --vd-lavc-threads=1 --no-audio --no-border --no-config \
             --no-window-dragging --no-input-default-bindings --no-osd-bar \
             --no-sub --loop -wid WID \
             --video-aspect-override="$videoaspect" --video-scale-x=1 --video-scale-y=1 \

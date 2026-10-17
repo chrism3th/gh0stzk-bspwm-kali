@@ -11,6 +11,8 @@
 export VISUAL="${EDITOR}"
 export EDITOR='geany'
 export BROWSER='firefox'
+export FILEMANAGER='thunar'
+export IMGVIEWER='viewnior'
 export HISTORY_IGNORE="(ls|cd|pwd|exit|sudo reboot|history|cd -|cd ..)"
 export SUDO_PROMPT="Deploying root access for %u. Password pls: "
 export BAT_THEME="base16"
@@ -50,11 +52,11 @@ zstyle ':completion:*' matcher-list \
 		'+r:|[._-]=* r:|=*' \
 		'+l:|=*'
 zstyle ':vcs_info:*' formats ' %B%s-[%F{magenta}%f %F{yellow}%b%f]-'
-zstyle ':fzf-tab:*' fzf-flags --style=full --height=90% --pointer '>' \
-                --color 'pointer:green:bold,bg+:-1:,fg+:green:bold,info:blue:bold,marker:yellow:bold,hl:gray:bold,hl+:yellow:bold' \
-                --input-label ' Search ' --color 'input-border:blue,input-label:blue:bold' \
-                --list-label ' Results ' --color 'list-border:green,list-label:green:bold' \
-                --preview-label ' Preview ' --color 'preview-border:magenta,preview-label:magenta:bold'
+zstyle ':fzf-tab:*' fzf-flags --style=full --height=90% --pointer '>' --gutter ' ' \
+                    --color 'pointer:green:bold,bg+:-1:,fg+:green:bold,info:blue:bold,marker:yellow:bold,hl:gray:bold,hl+:gray:bold' \
+                    --input-label ' Search ' --color 'input-border:blue,input-label:blue:bold' \
+                    --list-label ' Results ' --color 'list-border:green,list-label:green:bold' \
+                    --preview-label ' Preview ' --preview-label-pos '27:bottom' --color 'preview-border:magenta,preview-label:magenta:bold'
 zstyle ':fzf-tab:complete:cd:*' fzf-preview 'eza -1 --icons=always --color=always -a $realpath'
 zstyle ':fzf-tab:complete:eza:*' fzf-preview 'eza -1 --icons=always --color=always -a $realpath'
 zstyle ':fzf-tab:complete:bat:*' fzf-preview 'bat --color=always --theme=base16 $realpath'
@@ -158,9 +160,8 @@ fi
 #  ┌─┐┬  ┬┌─┐┌─┐
 #  ├─┤│  │├─┤└─┐
 #  ┴ ┴┴─┘┴┴ ┴└─┘
-alias mirrors="sudo reflector --verbose --latest 5 --country 'United States' --age 6 --sort rate --save /etc/pacman.d/mirrorlist"
-alias update="paru -Syu --nocombinedupgrade"
-alias grub-update="sudo grub-mkconfig -o /boot/grub/grub.cfg"
+alias update="sudo apt update && sudo apt full-upgrade"
+alias grub-update="sudo update-grub"
 
 alias music="ncmpcpp"
 

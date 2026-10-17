@@ -1,12 +1,14 @@
 #############################
 #		Marisol Theme		#
 #############################
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # https://github.com/gh0stzk/dotfiles
 
 # (Dracula) colorscheme
 bg="#282a36"
+bg_alt="#00282a36"
 fg="#f8f8f2"
+trans="#00282a36"
 
 black="#21222c"
 red="#ff5555"
@@ -25,17 +27,30 @@ magentab="#ff92df"
 cyanb="#a4ffff"
 whiteb="#ffffff"
 
+# Extend
+purple="#9580ff"
+amber="#ffcc66"
+pink="#ffb3d9"
+orange="#ffb86c"
+indigo="#6e6bc4"
+lime="#caffbf"
+grey="#9aa5ce"
+bluegray="#6a7dab"
+
 accent_color="#2f3240"
 arch_icon="#0f94d2"
 
+# Bar
+main_bar="bar12"
+
 # Bspwm options
-BORDER_WIDTH="2"		# Bspwm border
-TOP_PADDING="44"
+BORDER_WIDTH="2"        # Bspwm border
+TOP_PADDING="1"
 BOTTOM_PADDING="1"
 LEFT_PADDING="1"
 RIGHT_PADDING="1"
-NORMAL_BC="#ff79c6"		# Normal border color
-FOCUSED_BC="#bd93f9"	# Focused border color
+NORMAL_BC="$magenta"    # Normal border color
+FOCUSED_BC="$blue"      # Focused border color
 
 # Terminal font & size
 term_font_size="10"

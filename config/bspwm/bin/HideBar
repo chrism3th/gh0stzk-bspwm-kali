@@ -6,16 +6,26 @@
 #
 # HideBar - Hide polybar or eww bars for gh0stzk dotfiles
 # Dependencies:
-#   → bspwm, polybar, eww, xrandr
+#   → bspwm, polybar, eww
 #
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # Licensed under GPL-3.0 license
 # =============================================================
 
 # Configuration
-read -r current_rice <"$HOME"/.config/bspwm/.rice
+read -r current_rice < "$HOME/.config/bspwm/.rice"
 THEME_CONFIG="$HOME/.config/bspwm/rices/$current_rice/theme-config.bash"
-eww_bar_path="$HOME/.config/bspwm/rices/$current_rice/bar"
+current_bar=""
+while IFS='=' read -r key value; do
+    case "$key" in
+        main_bar)
+            value=${value#\"}
+            current_bar=${value%\"}
+            break
+            ;;
+    esac
+done < "$THEME_CONFIG"
+eww_bar_path="$HOME/.config/bspwm/bars/$current_bar"
 
 # Get padding value from theme-config.bash
 get_paddings() {
@@ -40,17 +50,16 @@ is_eww_theme() {
 }
 
 toggle_bar() {
+    local action m
+
     action="$1"
 
     if is_eww_theme; then
         if [ "$action" = "hide" ]; then
             eww -c "$eww_bar_path" close-all
         else
-            monitors=$(xrandr --listmonitors | awk 'NR>1 {print $4}')
-            count=0
-            for m in $monitors; do
-                eww -c "$eww_bar_path" open bar --id "$m" --arg monitor="$m" --screen "$count"
-                count=$((count + 1))
+            for m in $(bspc query -M --names); do
+                eww -c "$eww_bar_path" open bar --id "$m" --arg monitor="$m"
             done
         fi
     else

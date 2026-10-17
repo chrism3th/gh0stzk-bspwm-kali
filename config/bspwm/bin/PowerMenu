@@ -7,15 +7,15 @@
 # Script Name: PowerMenu
 # Description: Minimalist system power control menu for bspwm
 #
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # Licensed under GPL-3.0 license
 # =============================================================
 
-options="󰍁
-
-󰗽
-󰜉
-󰐥"
+_options="󰍁|Lock
+|Suspend
+󰗽|Logout
+󰜉|Reboot
+󰐥|Poweroff"
 
 rofi_cmd() {
 	rofi -dmenu \
@@ -24,12 +24,16 @@ rofi_cmd() {
 		-theme "$HOME"/.config/bspwm/config/rofi-themes/PowerMenu.rasi
 }
 
-chosen=$(printf "%s\n" "$options" | rofi_cmd)
+selected=$(printf '%s\n' "$_options" | cut -d'|' -f1 | rofi_cmd)
 
-case $chosen in
-    "󰐥") systemctl poweroff ;;
-    "󰜉") systemctl reboot ;;
-    "󰍁") ScreenLocker ;;
-    "") systemctl suspend ;;
-    "󰗽") bspc quit ;;
-esac
+if [ -n "$selected" ]; then
+    chosen=$(printf '%s\n' "$_options" | awk -F'|' -v sel="$selected" '$1 == sel {print $2}')
+
+    case $chosen in
+        "Lock") ScreenLocker ;;
+        "Suspend") systemctl suspend ;;
+        "Logout") bspc quit ;;
+        "Reboot") systemctl reboot ;;
+        "Poweroff") systemctl poweroff ;;
+    esac
+fi

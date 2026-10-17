@@ -95,7 +95,7 @@ apt_packages=(
     "build-essential" "git" "curl" "wget" "pkg-config" "gcc" "libc6-dev"
 
     # WM y herramientas core
-    "bspwm" "sxhkd" "polybar" "rofi" "dunst" "picom" "jgmenu"
+    "bspwm" "sxhkd" "polybar" "rofi" "dunst" "picom" "jgmenu" "i3lock-color"
 
     # Terminales
     "alacritty" "kitty"
@@ -108,22 +108,23 @@ apt_packages=(
     "lxsession" "xsettingsd" "redshift"
 
     # Utilidades CLI modernas
-    "bat" "fzf" "neovim" "tmux"
+    "bat" "eza" "fzf" "neovim" "tmux"
 
-    # Clipboard manager
-    "xfce4-clipman"
+    # Clipboard manager (lanzado desde bspwmrc)
+    "copyq"
 
     # Media players
-    "mpd" "mpc" "ncmpcpp" "mpv"
+    "mpd" "mpc" "ncmpcpp" "mpv" "ffmpeg" "cava"
 
     # Herramientas gráficas
-    "feh" "maim" "imagemagick" "webp-pixbuf-loader"
+    "feh" "maim" "imagemagick" "webp-pixbuf-loader" "viewnior"
+    "zathura" "zathura-pdf-poppler"
 
     # Editores y desarrollo
     "geany" "npm"
 
     # Utilidades X11
-    "x11-utils" "x11-xserver-utils" "xclip" "xdotool" "xdg-user-dirs"
+    "x11-utils" "x11-xserver-utils" "xclip" "xdotool" "xdo" "xdg-user-dirs"
 
     # Iconos y temas
     "papirus-icon-theme" "gtk2-engines-murrine" "gtk2-engines-pixbuf"
@@ -135,7 +136,7 @@ apt_packages=(
     "fonts-inconsolata" "fonts-ubuntu"
 
     # Herramientas adicionales
-    "jq" "webp"
+    "jq" "bc" "webp"
 
     # Shell
     "zsh" "zsh-autosuggestions" "zsh-syntax-highlighting"
@@ -153,6 +154,8 @@ apt_packages=(
     "x11proto-dev" "xserver-xorg-dev" "zstd"
     "libxcb1-dev" "libxcb-randr0-dev" "libxcb-xinerama0-dev"
     "libxcb-icccm4-dev" "libxcb-ewmh-dev" "libxcb-util0-dev"
+    "libxcb-shape0-dev" "libxcb-xfixes0-dev" "libxcursor-dev"
+    "libxft-dev" "libimlib2-dev" "libharfbuzz-dev" "libfontconfig-dev" "libfreetype-dev" "zlib1g-dev"
 )
 
 msg_info "Se instalarán ${#apt_packages[@]} paquetes"

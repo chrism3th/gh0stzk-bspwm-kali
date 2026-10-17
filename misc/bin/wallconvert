@@ -1,0 +1,56 @@
+#!/bin/sh
+#
+# WallConvert
+# Convert videos into lightweight animated wallpapers.
+#
+
+usage() {
+    printf 'Usage: %s <video>\n' "${0##*/}"
+    exit 1
+}
+
+[ $# -eq 1 ] || usage
+
+input=$1
+
+[ -f "$input" ] || {
+    printf 'Error: "%s" not found.\n' "$input"
+    exit 1
+}
+
+# Obtain current monitor resolution.
+resolution=$(
+    xrandr |
+    awk '/\*/ {print $1; exit}'
+)
+
+[ -n "$resolution" ] || {
+    printf 'Unable to determine screen resolution.\n'
+    exit 1
+}
+
+width=${resolution%x*}
+height=${resolution#*x}
+
+name=${input##*/}
+name=${name%.*}
+
+output="${name}-wallpaper.mp4"
+
+printf 'Input      : %s\n' "$input"
+printf 'Resolution : %sx%s\n' "$width" "$height"
+printf 'Output     : %s\n\n' "$output"
+
+ffmpeg \
+    -i "$input" \
+    -c:v libx264 \
+    -preset veryslow \
+    -crf 22 \
+    -tune animation \
+    -pix_fmt yuv420p \
+    -vf "scale=${width}:${height},fps=20" \
+    -x264-params ref=2:bframes=2 \
+    -coder 0 \
+    -threads 0 \
+    -an \
+    "$output"

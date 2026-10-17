@@ -1,12 +1,14 @@
 #############################
 #		Daniela Theme		#
 #############################
-# Copyright (C) 2021-2025 gh0stzk <z0mbi3.zk@protonmail.com>
+# Copyright (C) 2021-2026 gh0stzk <z0mbi3.zk@protonmail.com>
 # https://github.com/gh0stzk/dotfiles
 
 # (Catppuccin Mocha) colorscheme
 bg="#181825"
+bg_alt="#00181825"
 fg="#CDD6F4"
+trans="#00181825"
 
 black="#45475A"
 red="#F38BA8"
@@ -25,17 +27,30 @@ magentab="#F5C2E7"
 cyanb="#94E2D5"
 whiteb="#A6ADC8"
 
+# Extend
+purple="#cba6f7"
+amber="#f0c987"
+pink="#f2cdcd"
+orange="#fab387"
+indigo="#9399b2"
+lime="#c6e6a5"
+grey="#73739c"
+bluegray="#383857"
+
 accent_color="#1e1e2e"
 arch_icon="#0f94d2"
 
+# Bar
+main_bar="bar06"
+
 # Bspwm options
-BORDER_WIDTH="0"		# Bspwm border
-TOP_PADDING="46"
+BORDER_WIDTH="0"        # Bspwm border
+TOP_PADDING="1"
 BOTTOM_PADDING="1"
 LEFT_PADDING="1"
 RIGHT_PADDING="1"
-NORMAL_BC="#45475A"		# Normal border color
-FOCUSED_BC="#94E2D5"	# Focused border color
+NORMAL_BC="$black"      # Normal border color
+FOCUSED_BC="$cyan"      # Focused border color
 
 # Terminal font & size
 term_font_size="10"
