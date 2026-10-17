@@ -23,8 +23,7 @@ choose_terminal() {
     # Terminal List
     terminals="Alacritty
 St
-Kitty
-Ghostty"
+Kitty"
 
     current_term=$(tr '[:upper:]' '[:lower:]' < "$CFG_TERM")
 
@@ -101,17 +100,6 @@ case $MY_TERM in
 	    "--nvim") kitty -e nvim ;;
 	    "--music") kitty --name=MusicTerm --class=FloaTerm -e ncmpcpp ;;
 	    "--fetch") kitty --name=FetchTerm --class=FloaTerm -e ~/.local/bin/sysfetch ;;
-	esac
-	;;
-    "ghostty")
-	case $1 in
-	    "--terminal") ghostty ;;
-	    "--floating") ghostty --x11-instance-name=FloaTerm --title=FloaTerm ;;
-	    "--checkupdates") ghostty --x11-instance-name=Updating --background-opacity=0.93 --title=Updating -e Updates --print-updates ;;
-	    "--yazi") ghostty --x11-instance-name=YaziTerm --title=YaziTerm -e yazi ;;
-	    "--nvim") ghostty -e nvim ;;
-	    "--music") ghostty --x11-instance-name=MusicTerm --title=MusicTerm -e ncmpcpp ;;
-	    "--fetch") ghostty --x11-instance-name=FetchTerm --title=FetchTerm -e ~/.local/bin/sysfetch ;;
 	esac
 	;;
 esac

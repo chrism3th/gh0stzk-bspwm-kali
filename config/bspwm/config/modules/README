@@ -14,7 +14,7 @@ This is what would be called hooks in Matugen.
 
 -----
 
-For example, the module for changing the Ghostty terminal's color scheme generates the theme template file in the script, using the color variables set in theme-config.bash.
+For example, the module for changing the Kitty terminal's color scheme generates the theme template file in the script, using the color variables set in theme-config.bash.
 
-It then generates and overwrites the Ghostty theme, and the command `pkill -USR2 -x ghostty` is sent, which resets the Ghostty configuration and changes the colors on the fly.
+It then generates and overwrites the Kitty theme, and the command `pkill -USR1 -x kitty` is sent, which reloads the Kitty configuration and changes the colors on the fly.
 
